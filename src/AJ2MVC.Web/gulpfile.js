@@ -8,7 +8,7 @@ var sourcemaps = require("gulp-sourcemaps");
 var rename = require("gulp-rename");
 var exec = require('child_process').exec;
 
-var rhetosPath = 'D:/Projects/Spikes/RhetosTest/Rhetos';
+var rhetosPath = 'C:/Projects/2CS/RhetosDEV/Rhetos';
 
 // var minify = require("gulp-minify");
 

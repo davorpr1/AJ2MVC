@@ -11,6 +11,11 @@ import { RestaurantsComponent } from './../components/restaurants.component';
 import { FoodMenusComponent } from './../components/foodmenus.component';
 import { RestaurantsService } from './../services/restaurants.service';
 import { FoodMenuService } from './../services/foodmenu.service';
+import { PermissionProvider } from './../services/permission-provider.service';
+
+import { FoodMenu } from './../models/foodmenu';
+import { Restaurant } from './../models/restaurant';
+import { IDataStructure } from './../models/interfaces';
 
 declare var jQuery: JQueryStatic;
 
@@ -29,8 +34,13 @@ declare var jQuery: JQueryStatic;
 ])
 class App2Component implements AfterViewInit, IRouteMechanism {
 
-    constructor(private m_elementRef: ElementRef, logger: TestLogger, private http: Http, gds: GlobalDataSharing, private router: Router) {
-    
+    constructor(private m_elementRef: ElementRef,
+        logger: TestLogger,
+        private http: Http,
+        gds: GlobalDataSharing,
+        private router: Router,
+        private permissionService: PermissionProvider
+    ) {
         let newMenuItem: MenuItem = new MenuItem();
         newMenuItem.Name = "Restaurants";
         newMenuItem.Link = "RestaurantCenter";
@@ -66,7 +76,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 }
 
 bootstrap(App2Component, [
-    RestaurantsService, FoodMenuService,
+    RestaurantsService, FoodMenuService, PermissionProvider,
     provide(TestLogger, { useClass: TestLogger }),
     provide(GlobalDataSharing, { useClass: GlobalDataSharing }),
     HTTP_PROVIDERS, ROUTER_PROVIDERS,

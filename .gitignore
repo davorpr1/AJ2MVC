@@ -1,0 +1,7 @@
+*.cache
+*node_modules*
+/src/AJ2MVC.Web/*.user
+/src/AJ2MVC.Web/dist/*
+/src/AJ2MVC.Web/wwwroot/lib/*
+/src/AJ2MVC.Web/wwwroot/js/*
+/src/AJ2MVC.Rhetos/obj/*

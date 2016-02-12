@@ -9,6 +9,8 @@ import 'rxjs/add/operator/toPromise';
 import { AppSettings } from './../app/app.settings';
 
 import { IDataStructure } from './../models/interfaces';
+import { MyClaim } from './../models/security/claim';
+import { PermissionProvider } from './../services/permission-provider.service';
 
 export class FieldFilter {
     public Field: string;
@@ -25,8 +27,15 @@ export class RhetosRestService<T extends IDataStructure> {
     data$: Observable<Array<T>>;
     private _dataObserver: any;
     private _loaded: boolean = false;
-    private _http: Http;
-    private _dummyEntityInstance: T;
+    protected _http: Http;
+    protected _permissionProvider: PermissionProvider;
+    protected _permissionHolderPromise: Promise<MyClaim[]>;
+    protected _dummyEntityInstance: T;
+
+    private _hasReadRight: boolean = false;
+    private _hasNewRight: boolean = false;
+    private _hasEditRight: boolean = false;
+    private _hasRemoveRight: boolean = false;
 
     public getModuleName(): string { return this._dummyEntityInstance.getModuleName(); }
     public getEntityName(): string { return this._dummyEntityInstance.getEntityName(); }
@@ -37,15 +46,29 @@ export class RhetosRestService<T extends IDataStructure> {
         data: Array<T>
     };
 
-    constructor(http: Http) {
+    constructor(http: Http, permissionProvider: PermissionProvider) {
         this.data$ = new Observable((observer: any) => this._dataObserver = observer).share();
         this._http = http;
+        this._permissionProvider = permissionProvider;
         this._dataStore = { data: [] };
     }
-    
+
+    private updatePermissions(permissions: MyClaim[]) {
+        permissions.map((claim: MyClaim) => {
+            if (claim.ClaimRight === "Edit") this._hasEditRight = claim.Applies;
+            if (claim.ClaimRight === "New") this._hasNewRight = claim.Applies;
+            if (claim.ClaimRight === "Remove") this._hasRemoveRight = claim.Applies;
+            if (claim.ClaimRight === "Read") this._hasReadRight = claim.Applies;
+        });
+        console.log(this._dummyEntityInstance.getEntityName() + ' rights: New(' + this._hasNewRight + '), Read(' + this._hasReadRight + '), Edit(' + this._hasEditRight + '), Remove(' + this._hasRemoveRight + ')');        
+    } 
+
     // This must be called before using Service itself.
     public initializeDataStructure(dataStructure: T) {
         this._dummyEntityInstance = dataStructure;
+
+        this._permissionProvider.data$.subscribe(permissions => this.updatePermissions(this._permissionProvider.checkEntityPermissions(this._dummyEntityInstance)));
+        this.updatePermissions(this._permissionProvider.checkEntityPermissions(this._dummyEntityInstance));
     }
 
     getCurrentLibrary() {
@@ -105,15 +128,19 @@ export class RhetosRestService<T extends IDataStructure> {
     }
 
     createEntity(entity: T) {
-        let headers = new Headers({ 'Content-Type': 'application/json' });
-        let options = new RequestOptions({ headers: headers });
+        if (!this._hasNewRight) {
+            console.log('User does not have "New" right on "' + this.getModuleName() + '.' + this.getEntityName() + '".');
+        } else {
+            let headers = new Headers({ 'Content-Type': 'application/json' });
+            let options = new RequestOptions({ headers: headers });
 
-        this._http.post(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/', this.entityToJSON(entity), options)
-            .subscribe(data => {
-                entity.ID = data.json().ID;
-                this._dataStore.data.push(entity);
-                if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
-            }, (error: any) => console.log('Could not create entity.'));
+            this._http.post(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/', this.entityToJSON(entity), options)
+                .subscribe(data => {
+                    entity.ID = data.json().ID;
+                    this._dataStore.data.push(entity);
+                    if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                }, (error: any) => console.log('Could not create entity.'));
+        }
     }
 
     updateEntity(entity: T) {

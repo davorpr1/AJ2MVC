@@ -59,6 +59,8 @@ export class FoodMenuDetailComponent {
     }
 
     activeFromDateChanged(event: any) {
+        this.activeFromControl.value = event;
+        this.activeFromControl.updateValueAndValidity();
         this.logger.log('ActiveFromDate changed (VIA events)....');
     }
 

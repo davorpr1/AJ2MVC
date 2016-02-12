@@ -1,0 +1,24 @@
+Module Common
+{
+	Computed AllClaims
+		'(repository, executionContext) =>
+		{
+			var claims = repository.Common.Claim.Query().ToList();
+			var securityClaims = claims.Select(c => new Rhetos.Security.Claim(c.ClaimResource, c.ClaimRight)).ToList();
+			var authorizations = executionContext.AuthorizationManager.GetAuthorizations(securityClaims);
+		
+			return claims.Zip(authorizations, (claim, authorized) => new Common.AllClaims {
+					ID = claim.ID,
+					ClaimResource = claim.ClaimResource,
+					ClaimRight = claim.ClaimRight,
+					Applies = authorized
+				}).ToArray();
+		 }'
+	{
+		ShortString ClaimResource;
+		ShortString ClaimRight;
+		Bool Applies;
+		
+		UseExecutionContext;
+	}
+}
