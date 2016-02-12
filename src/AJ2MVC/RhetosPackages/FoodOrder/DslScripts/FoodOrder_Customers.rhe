@@ -1,0 +1,138 @@
+Module FoodOrder {
+	Entity Customer {
+		ShortString Name;
+		Reference Principal Common.Principal;
+	}
+	
+	Entity MealOrder {
+		ShortString Name;
+		Reference Restaurant;
+	}
+	
+	Entity MealOrder_Item {
+		Reference MealOrder;
+		Reference FoodMenuItem;
+	}
+	
+	Entity OrderState {
+		ShortString Name { Required; }
+	
+		Bool Initialization { SqlDefault "0"; }
+		Bool Cancelled { SqlDefault "0"; }
+		Bool Confirmed { SqlDefault "0"; }
+		Bool Placed { SqlDefault "0"; }
+		Bool Ready { SqlDefault "0"; }
+		Bool Completed { SqlDefault "0"; }
+	}
+	
+	PolyMorphic OrderEvents {
+		Reference MealOrder;
+		Reference OrderState;
+		DateTime EventTime;
+		Reference Author Common.Principal;
+	}
+	
+	Entity MealOrder_Initialized {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Initialization = 1)";
+		}
+	}
+	
+	Entity MealOrder_Updated {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Initialization = 1)";
+		}	
+	}
+	
+	Entity MealOrder_Cancelled {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Cancelled = 1)";
+		}	
+	}
+
+	Entity MealOrder_Confirmed {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Confirmed = 1)";
+		}	
+	}
+
+	Entity MealOrder_Sent {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Placed = 1)";
+		}	
+	}
+
+	Entity MealOrder_Ready {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Ready = 1)";
+		}	
+	}
+
+	Entity MealOrder_Delivered {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Ready = 1)";
+		}	
+	}
+
+	Entity MealOrder_Completed {
+		Reference MealOrder;
+		Reference Author Common.Principal;
+		DateTime CreatedAt { CreationTime; }
+		
+		Is FoodOrder.OrderEvents {
+			Implements FoodOrder.OrderEvents.MealOrder "MealOrderID";
+			Implements FoodOrder.OrderEvents.Author "AuthorID";
+			Implements FoodOrder.OrderEvents.EventTime "CreatedAt";
+			Implements FoodOrder.OrderEvents.OrderState "(SELECT ID FROM FoodOrder.OrderState WHERE Completed = 1)";
+		}	
+	}
+}

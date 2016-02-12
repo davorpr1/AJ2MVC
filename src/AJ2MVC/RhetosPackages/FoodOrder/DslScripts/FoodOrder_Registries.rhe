@@ -1,0 +1,49 @@
+Module FoodOrder {	
+	Entity Restaurant {
+		ShortString Name;
+		ShortString Address;
+		LongString Description;
+		ShortString WebSite;
+		
+		DateTime DateOpened;
+		DateTime DateClosed;
+		
+		DateTime WorkingDayOpenedFrom;
+		DateTime WorkingDayClosedAt;
+	}
+	
+	Entity FoodMenu {
+		ShortString Name;
+		Reference Restaurant;
+		
+		DateTime ActiveFrom;
+		DateTime ActiveUntil;
+		
+		Bool WorkDayOnly { SqlDefault "0"; }
+		Bool WeekendOnly { SqlDefault "0"; }
+	}
+	
+	Entity FoodCategory {
+		ShortString Name;
+		
+		Bool Vegetarian { SqlDefault "0"; }
+		Bool Vegan { SqlDefault "0"; }
+		Bool Meat { SqlDefault "0"; }
+		Bool Soup { SqlDefault "0"; }
+		Bool Fruit { SqlDefault "0"; }
+		Bool MainMeal { SqlDefault "0"; }
+		Bool Dessert { SqlDefault "0"; }
+	}
+	
+	Entity FoodMenuItem {
+		Reference FoodMenu;
+		ShortString Name;
+		LongString Description;
+		Money Price;
+	}
+
+	Entity MealCategories {
+		Reference FoodMenuItem;
+		Reference FoodCategory;
+	}
+}

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>FoodOrder.Service</id>
+	<authors>test</authors>
+    <version>0.0.0.1</version>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>FoodOrder.Service</description>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Rhetos" targetFramework="" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="DslScripts\**\*.*" target="DslScripts" />
+  </files>
+</package>
