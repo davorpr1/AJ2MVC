@@ -75,7 +75,6 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit 
     ngAfterViewInit() {
         var that = this;
         jQuery(this.elRef.nativeElement).find("#inputCon").attr('id', 'inputCon' + this._id);
-
         jQuery(this.elRef.nativeElement).find("#" + 'inputCon' + this._id).datepicker({
             changeMonth: true,
             dateFormat: "dd.mm.yy.",

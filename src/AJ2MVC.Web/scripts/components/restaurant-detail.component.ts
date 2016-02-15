@@ -4,7 +4,8 @@ import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod,
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
 import { Restaurant } from './../models/restaurant';
-import { RestaurantsService } from './../services/restaurants.service';
+import { EntityDataService } from './../models/interfaces';
+import { EntityDataServiceFactory } from './../factories/entity-data-service.factory';
 
 @Component({
     directives: [FORM_DIRECTIVES],
@@ -36,16 +37,17 @@ export class RestaurantDetailComponent implements OnInit {
     private restaurant: Restaurant = new Restaurant();
     private restaurantForm: ControlGroup;
     private nameControl: AbstractControl;
+    private restaurantService: EntityDataService;
     private addressControl: AbstractControl;
 
     constructor(private logger: TestLogger,
         routeParams: RouteParams,
         private router: Router,
         private http: Http,
-        private restaurantService: RestaurantsService,
+        private entityServiceFactory: EntityDataServiceFactory,
         private fb: FormBuilder    )
     {
-        this.restaurantService.initializeDataStructure(new Restaurant());
+        this.restaurantService = entityServiceFactory.getInstanceForEntity(new Restaurant());
 
         this._id = routeParams.get("id");
 

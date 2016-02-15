@@ -21,7 +21,10 @@ export class GlobalOverridesInjector {
         GlobalOverridesInjector._registeredProviders.push(provider);
         this._injector = Injector.resolveAndCreate(GlobalOverridesInjector._registeredProviders);
     }
-
+ 
+    /**
+     * Adds some kind of providers...
+     */
     addProviders(providers: Provider[]) {
         GlobalOverridesInjector._registeredProviders = GlobalOverridesInjector._registeredProviders.concat(providers);
         this._injector = Injector.resolveAndCreate(GlobalOverridesInjector._registeredProviders);

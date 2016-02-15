@@ -8,7 +8,7 @@ import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
 
-import { IDataStructure } from './../models/interfaces';
+import { IDataStructure, EntityDataService } from './../models/interfaces';
 import { MyClaim } from './../models/security/claim';
 import { PermissionProvider } from './../services/permission-provider.service';
 
@@ -23,7 +23,7 @@ export class FieldFilter {
 }
 
 @Injectable()
-export class RhetosRestService<T extends IDataStructure> {
+export class RhetosRestService<T extends IDataStructure> implements EntityDataService {
     data$: Observable<Array<T>>;
     private _dataObserver: any;
     private _loaded: boolean = false;
@@ -39,6 +39,7 @@ export class RhetosRestService<T extends IDataStructure> {
 
     public getModuleName(): string { return this._dummyEntityInstance.getModuleName(); }
     public getEntityName(): string { return this._dummyEntityInstance.getEntityName(); }
+    public getEntityNameID(): string { return this._dummyEntityInstance.getNameID(); }
     public entityToJSON(entity: T): string { return entity.entityToJSON(); }
     public fromRawEntity(entity: T): T { return (this._dummyEntityInstance.fromRawEntity(entity) as T); }
 

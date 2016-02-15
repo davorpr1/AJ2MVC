@@ -7,10 +7,12 @@ import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod,
 import {bootstrap} from 'angular2/platform/browser';
 import { TestLogger } from './../components/logger';
 import { GlobalDataSharing, MenuItem, IRouteMechanism } from './../components/menu';
+import { EntityDataServiceFactory } from './../factories/entity-data-service.factory';
 import { RestaurantsComponent } from './../components/restaurants.component';
 import { FoodMenusComponent } from './../components/foodmenus.component';
-import { RestaurantsService } from './../services/restaurants.service';
+import { RestaurantsService, RestaurantsDummyService } from './../services/restaurants.service';
 import { FoodMenuService } from './../services/foodmenu.service';
+import { EntityDataService } from './../models/interfaces';
 import { PermissionProvider } from './../services/permission-provider.service';
 
 import { FoodMenu } from './../models/foodmenu';
@@ -25,6 +27,7 @@ declare var jQuery: JQueryStatic;
     template: `<h1>Food ordering Administration</h1>
         <div class="col-xs-9" style="border:1px;">
             <router-outlet></router-outlet>
+
         </div>
     `
 })
@@ -54,6 +57,9 @@ class App2Component implements AfterViewInit, IRouteMechanism {
         newMenuItem.RouteMechanism = this;
         newMenuItem.Tooltip = "Basic table to show all the food menus";
         gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
+
+        gds.addSharedData<EntityDataService>("DataServices", new RestaurantsService(this.http, this.permissionService));
+        //gds.addSharedData<EntityDataService>("DataServices", new RestaurantsDummyService());
     }
 
     handleNavigation(link: string) {
@@ -76,7 +82,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 }
 
 bootstrap(App2Component, [
-    RestaurantsService, FoodMenuService, PermissionProvider,
+    RestaurantsService, FoodMenuService, PermissionProvider, EntityDataServiceFactory,
     provide(TestLogger, { useClass: TestLogger }),
     provide(GlobalDataSharing, { useClass: GlobalDataSharing }),
     HTTP_PROVIDERS, ROUTER_PROVIDERS,

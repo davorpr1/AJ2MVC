@@ -15,7 +15,7 @@ import { RestaurantDetailComponent } from './../components/restaurant-detail.com
 })
 @RouteConfig([
     { path: 'list/', name: 'RestaurantList', component: RestaurantListComponent, useAsDefault: true },
-    { path: 'detail/:id', name: 'RestaurantDetail', component: RestaurantDetailComponent }
+    { path: 'detail/:id', name: 'FoodOrder_Restaurant_DetailComponent', component: RestaurantDetailComponent }
 ])
 export class RestaurantsComponent {
 

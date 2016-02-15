@@ -20,6 +20,7 @@ export class Restaurant extends BaseEntity {
     public DateClosed: string;
 
     public ID: string;    
+    get browseFields(): Array<string> { return ["Name", "Address", "WebSite"];}
 
     getNewInstance(): Restaurant { return new Restaurant(); }
     getModuleName(): string { return "FoodOrder"; }

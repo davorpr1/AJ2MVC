@@ -11,9 +11,11 @@ export class BaseEntity implements IDataStructure {
         return {
         };
     }
+    get browseFields(): Array<string> { return ["ID"]; }
     getNewInstance(): IDataStructure { throw "Has to be overriden."; }
     getModuleName(): string { return ""; }
     getEntityName(): string { return ""; }
+    getNameID(): string { return this.getModuleName() + '_' + this.getEntityName(); }
 
     public setModelData(modelData: IDataStructure) {
         if (modelData) {
