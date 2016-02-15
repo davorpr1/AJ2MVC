@@ -37,10 +37,16 @@
         @RenderBody()
         <hr />
         <footer>
+            <div class="spinner"></div>
             <p>&copy; 2016 - AJ2MVC</p>
         </footer>
     </div>
-    
+
+    <div id="loader" class="overlay-loader">
+        <div id="global-loader-background" class="loader-background"></div>
+        <img id="global-loader-icon" class="loader-icon spinning-cog" src="~/css/cog11.svg" data-cog="cog11">
+    </div>
+
     <script src="~/lib/jquery.js"></script>
     <script src="~/lib/jquery-ui.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -64,13 +70,21 @@
                 'moment': '~/../../../lib/moment'
             }
         });
+        jQuery(window).load(function ($) {
+
+            jQuery('#global-loader-icon').removeClass('spinning-cog').addClass('shrinking-cog');
+            jQuery('#global-loader-background').delay(1300).fadeOut();
+            jQuery('#loader').removeClass('overlay-loader');
+
+            console.log('loading finished');
+        });
     </script>
     <script src="~/lib/angular2.js"></script>
     <script src="~/lib/ng2-bootstrap.js"></script>
     <script src="~/lib/http.js"></script>
     <script src="~/lib/router.js"></script>
     <script src="~/js/app.js"></script>
-    
+
     @RenderSection("scripts", required: false)
 </body>
 </html>
