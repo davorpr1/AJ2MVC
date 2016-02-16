@@ -1,15 +1,25 @@
-﻿import { Validator } from 'angular2/common';
+﻿import { Injectable } from 'angular2/core';
+import { Validator } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
+
+export interface IEmptyConstruct {
+    new (): any;
+}
+
+export class FieldDefinition {
+    Name: string;
+    Pipe: string;
+}
 
 export interface IDataStructure {
     ID: string; // basic property - ID
-
+    
     getNewInstance(): IDataStructure;
     // EC5 for know, no map object definition
     getValidators(): { [propName: string]: Function[]; };
     setModelData(modelData: IDataStructure): void;
 
-    browseFields: Array<string>;
+    browseFields: Array<FieldDefinition>;
     getModuleName(): string;
     getEntityName(): string;
     getNameID(): string;
@@ -25,12 +35,26 @@ export interface IDataStructure {
     entityToJSON(): string;
 }
 
-export interface EntityDataService {
+export class FieldFilter {
+    public Field: string;
+    public Operator: string;
+    public Term: string;
+
+    public static toRhetosRESTQueryString(filter: FieldFilter) {
+        return '{"Property":"' + filter.Field + '","Operation":"' + filter.Operator + '","Value":"' + filter.Term + '"}';
+    }
+}
+
+@Injectable()
+export abstract class IEntityDataService {
     data$: Observable<Array<any>>;
-    getEntityNameID(): string;
-    initdataLoad(): void;
-    reloadData(): void;
-    getCurrentLibrary(): Array<any>;
-    fetchEntity(ID: string): any;
-    updateEntity(entity: any): void;
+    abstract getEntityNameID(DataStructure: IEmptyConstruct): string;
+    abstract initdataLoad(DataStructure: IEmptyConstruct): void;
+    abstract reloadData(DataStructure: IEmptyConstruct): void;
+    abstract getCurrentLibrary(DataStructure: IEmptyConstruct): Array<any>;
+    abstract fetchEntity(DataStructure: IEmptyConstruct, ID: string): Promise<any>;
+    abstract updateEntity(DataStructure: IEmptyConstruct, entity: any): void;
+    abstract createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
+    abstract deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
+    abstract filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<any[]>;
 }

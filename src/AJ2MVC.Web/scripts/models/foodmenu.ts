@@ -3,7 +3,7 @@
 import { EventEmitter } from 'angular2/core';
 import { Validators, Validator } from 'angular2/common';
 import { BaseEntity } from './../models/entitybase';
-
+import { FieldDefinition } from './../models/interfaces';
 import * as momment_ from 'moment';
 const moment: moment.MomentStatic = (<any>momment_)["default"] || momment_;
 
@@ -16,6 +16,8 @@ export class FoodMenu extends BaseEntity {
 
     public ActiveFromDate: Date = null;
     public ActiveUntilDate: Date = null;
+
+    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "" }, { Name: "ActiveFrom", Pipe: "msDate" }]; }
 
     getNewInstance(): FoodMenu { return new FoodMenu(); }
     getModuleName(): string { return "FoodOrder"; }
@@ -30,6 +32,7 @@ export class FoodMenu extends BaseEntity {
 
     public setModelData(modelData: FoodMenu) {
         if (modelData) {
+            modelData = this.fromRawEntity(modelData);
             this.ID = modelData.ID;
             this.Name = modelData.Name;
             this.ActiveFrom = modelData.ActiveFrom;

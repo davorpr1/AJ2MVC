@@ -8,134 +8,177 @@ import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
 
-import { IDataStructure, EntityDataService } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter } from './../models/interfaces';
 import { MyClaim } from './../models/security/claim';
 import { PermissionProvider } from './../services/permission-provider.service';
 
-export class FieldFilter {
-    public Field: string;
-    public Operator: string;
-    public Term: string;
-
-    public static toRhetosRESTQueryString(filter: FieldFilter) {
-        return '{"Property":"' + filter.Field + '","Operation":"' + filter.Operator + '","Value":"' + filter.Term + '"}';
+export class DataStructureWithClaims {
+    dataStructure: IDataStructure;
+    DataStructureType: IEmptyConstruct;
+    constructor(DataStructure: IEmptyConstruct) {
+        this.DataStructureType = DataStructure;
+        this.dataStructure = new DataStructure();
     }
+
+    ReadRight: boolean = false;
+    NewRight: boolean = false;
+    EditRight: boolean = false;
+    RemoveRight: boolean = false;
+
+    InitialDataLoaded: boolean = false;
 }
 
 @Injectable()
-export class RhetosRestService<T extends IDataStructure> implements EntityDataService {
-    data$: Observable<Array<T>>;
+export class RhetosRestService implements IEntityDataService {
+    data$: Observable<Array<IDataStructure>>;
     private _dataObserver: any;
-    private _loaded: boolean = false;
     protected _http: Http;
-    protected _permissionProvider: PermissionProvider;
     protected _permissionHolderPromise: Promise<MyClaim[]>;
-    protected _dummyEntityInstance: T;
+    protected _dummyEntityInstances: Array<DataStructureWithClaims> = new Array<DataStructureWithClaims>();
 
-    private _hasReadRight: boolean = false;
-    private _hasNewRight: boolean = false;
-    private _hasEditRight: boolean = false;
-    private _hasRemoveRight: boolean = false;
+    public getDummy(DataStructure: IEmptyConstruct): IDataStructure {
+        return this.getDummyWithClaim(DataStructure).dataStructure;
+    }
 
-    public getModuleName(): string { return this._dummyEntityInstance.getModuleName(); }
-    public getEntityName(): string { return this._dummyEntityInstance.getEntityName(); }
-    public getEntityNameID(): string { return this._dummyEntityInstance.getNameID(); }
-    public entityToJSON(entity: T): string { return entity.entityToJSON(); }
-    public fromRawEntity(entity: T): T { return (this._dummyEntityInstance.fromRawEntity(entity) as T); }
+    public getDummyWithClaim(DataStructure: IEmptyConstruct): DataStructureWithClaims {
+        let res: DataStructureWithClaims;
+        res = this._dummyEntityInstances.find((dummy: DataStructureWithClaims) => dummy.dataStructure instanceof DataStructure);
+        if (!res) {
+            res = new DataStructureWithClaims(DataStructure);
+            this._dummyEntityInstances.push(res);
+            this.updatePermissions(this.permissionProvider.checkEntityPermissions(res.dataStructure));
+        }
+        return res;
+    }
+
+    public getModuleName(DataStructure: IEmptyConstruct): string { return this.getDummy(DataStructure).getModuleName(); }
+    public getEntityName(DataStructure: IEmptyConstruct): string { return this.getDummy(DataStructure).getEntityName(); }
+    public getEntityNameID(DataStructure: IEmptyConstruct): string { return this.getDummy(DataStructure).getNameID(); }
+    public entityToJSON(entity: IDataStructure): string { return entity.entityToJSON(); }
+    public fromRawEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): IDataStructure {
+        let res: any = new DataStructure();
+        (res as IDataStructure).setModelData(entity);
+        return res;
+    }
 
     private _dataStore: {
-        data: Array<T>
+        data: Array<IDataStructure>
     };
 
-    constructor(http: Http, permissionProvider: PermissionProvider) {
+    constructor(http: Http, private permissionProvider: PermissionProvider) {
         this.data$ = new Observable((observer: any) => this._dataObserver = observer).share();
         this._http = http;
-        this._permissionProvider = permissionProvider;
+        this.permissionProvider.data$.subscribe(newPermissions => this.updatePermissions(newPermissions));
         this._dataStore = { data: [] };
     }
 
     private updatePermissions(permissions: MyClaim[]) {
+        var that = this;
         permissions.map((claim: MyClaim) => {
-            if (claim.ClaimRight === "Edit") this._hasEditRight = claim.Applies;
-            if (claim.ClaimRight === "New") this._hasNewRight = claim.Applies;
-            if (claim.ClaimRight === "Remove") this._hasRemoveRight = claim.Applies;
-            if (claim.ClaimRight === "Read") this._hasReadRight = claim.Applies;
+            this._dummyEntityInstances.filter((dum: DataStructureWithClaims) => dum.dataStructure.getModuleName() + '.' + dum.dataStructure.getEntityName() === claim.ClaimResource)
+                .forEach((dum: DataStructureWithClaims) => {
+                    if (claim.ClaimRight === "Edit") dum.EditRight = claim.Applies;
+                    if (claim.ClaimRight === "New") dum.NewRight = claim.Applies;
+                    if (claim.ClaimRight === "Remove") dum.RemoveRight = claim.Applies;
+                    if (claim.ClaimRight === "Read") {
+                        if (!dum.ReadRight && claim.Applies) {
+                            dum.ReadRight = claim.Applies;
+                            that.reloadData(dum.DataStructureType);
+                        }
+                    }
+            });
         });
-        console.log(this._dummyEntityInstance.getEntityName() + ' rights: New(' + this._hasNewRight + '), Read(' + this._hasReadRight + '), Edit(' + this._hasEditRight + '), Remove(' + this._hasRemoveRight + ')');        
     } 
 
-    // This must be called before using Service itself.
-    public initializeDataStructure(dataStructure: T) {
-        this._dummyEntityInstance = dataStructure;
-
-        this._permissionProvider.data$.subscribe(permissions => this.updatePermissions(this._permissionProvider.checkEntityPermissions(this._dummyEntityInstance)));
-        this.updatePermissions(this._permissionProvider.checkEntityPermissions(this._dummyEntityInstance));
+    getCurrentLibrary(DataStructure: IEmptyConstruct): Array<typeof DataStructure> {
+        return this._dataStore.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
     }
 
-    getCurrentLibrary() {
-        return this._dataStore.data;
-    }
-
-    initdataLoad() {
-        if (!this._loaded) {
-            this._loaded = true;
-            this.reloadData();
+    initdataLoad(DataStructure: IEmptyConstruct) {
+        if (!this.getDummyWithClaim(DataStructure).InitialDataLoaded) {
+            this.getDummyWithClaim(DataStructure).InitialDataLoaded = true;
+            this.reloadData(DataStructure);
         }
     }
 
-    public createEntityInstance(model: T): T {
-        let res: T = (this._dummyEntityInstance.getNewInstance() as T);
-        res.setModelData(model);
+    public createEntityInstance(DataStructure: IEmptyConstruct, model: IDataStructure): typeof DataStructure {
+        let res: any = new DataStructure();
+        (res as IDataStructure).setModelData(model);
         return res;
     }
 
-    fetchEntity(id: string): Promise<T> {
-        let res: T = null;
-        this._dataStore.data.every((t: T) => {
+    fetchEntity(DataStructure: IEmptyConstruct, id: string): Promise<typeof DataStructure> {
+        let res: typeof DataStructure = null;
+        this._dataStore.data.every((t: IDataStructure) => {
             if (t.ID === id) {
-                res = this.createEntityInstance(t);
+                res = this.createEntityInstance(DataStructure, t);
                 return false;
             }
             return true;
         });
         if (res) {
-            return new Promise<T>(function (resolve, reject) {
+            return new Promise<typeof DataStructure>(function (resolve, reject) {
                 console.log('Entity with ID (' + id + ') found in data store.');
                 resolve(res);
             });
         } else {
-            return this._http.get(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/' + id)
-                .map(
-                (data) => {
-                    let entObj: T = this.fromRawEntity(data.json());
-                    this._dataStore.data.push(entObj);
-                    if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+            var that = this;
+            if (id) {
+                return this._http.get(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + id)
+                    .map(
+                    (data) => {
+                        let entObj: IDataStructure = this.fromRawEntity(DataStructure, data.json());
+                        let found: boolean = false;
+                        this._dataStore.data.forEach((rest, i) => {
+                            if (entObj.ID === rest.ID) {
+                                this._dataStore.data[i] = entObj;
+                                found = true;
+                            }
+                        });
+                        if (!found) this._dataStore.data.push(entObj);
 
-                    return this.createEntityInstance(entObj);
-                }, (error: any) => {
-                    console.log('Could not create entity.');
-                    return this.createEntityInstance(null);
-                }
-                ).toPromise();
+                        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                        return this.createEntityInstance(DataStructure, entObj);
+                    }, (error: any) => {
+                        console.log('Could not create entity.');
+                        return this.createEntityInstance(DataStructure, null);
+                    }
+                    ).toPromise();
+            } else return new Promise<typeof DataStructure>(function (resolve, reject) { resolve(that.createEntityInstance(DataStructure, null)); });
         }
     }
 
-    reloadData() {
-        this._http.get(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/')
-            .subscribe(data => {
-                this._dataStore.data = Array.from(data.json().Records, (rec: T) => this.fromRawEntity(rec));
-                if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
-            }, error => console.log('Could not load data.'));
+    reloadData(DataStructure: IEmptyConstruct) {
+        if (this.getDummyWithClaim(DataStructure).ReadRight) {
+            this._http.get(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/')
+                .subscribe(data => {
+                    let toAdd: Array<IDataStructure> = new Array<IDataStructure>();
+                    data.json().Records.map((rec: IDataStructure) => {
+                        let preparedEnt: IDataStructure = this.fromRawEntity(DataStructure, rec);
+                        let found: boolean = false;
+                        this._dataStore.data.forEach((rest, i) => {
+                            if (preparedEnt.ID === rest.ID) {
+                                this._dataStore.data[i] = preparedEnt;
+                                found = true;
+                            }
+                        });
+                        if (!found) toAdd.push(preparedEnt);
+                    });
+
+                    this._dataStore.data = this._dataStore.data.concat(toAdd);
+                    if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                }, error => console.log('Could not load data.'));
+        }
     }
 
-    createEntity(entity: T) {
-        if (!this._hasNewRight) {
-            console.log('User does not have "New" right on "' + this.getModuleName() + '.' + this.getEntityName() + '".');
+    createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
+        if (!this.getDummyWithClaim(DataStructure).NewRight) {
+            console.log('User does not have "New" right on "' + this.getModuleName(DataStructure) + '.' + this.getEntityName(DataStructure) + '".');
         } else {
             let headers = new Headers({ 'Content-Type': 'application/json' });
             let options = new RequestOptions({ headers: headers });
 
-            this._http.post(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/', this.entityToJSON(entity), options)
+            this._http.post(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/', this.entityToJSON(entity), options)
                 .subscribe(data => {
                     entity.ID = data.json().ID;
                     this._dataStore.data.push(entity);
@@ -144,16 +187,16 @@ export class RhetosRestService<T extends IDataStructure> implements EntityDataSe
         }
     }
 
-    updateEntity(entity: T) {
+    updateEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
         if (!entity.ID) {
-            this.createEntity(entity);
+            this.createEntity(DataStructure, entity);
             return;
         }
 
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
 
-        this._http.put(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/' + entity.ID, this.entityToJSON(entity), options)
+        this._http.put(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID, this.entityToJSON(entity), options)
             .subscribe(data => {
                 this._dataStore.data.forEach((rest, i) => {
                     if (entity.ID === rest.ID) { this._dataStore.data[i] = entity; }
@@ -163,8 +206,8 @@ export class RhetosRestService<T extends IDataStructure> implements EntityDataSe
             }, (error: any) => console.log('Could not update entity.'));
     }
 
-    deleteEntity(entity: T) {
-        this._http.delete(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName() + '/' + entity.ID).subscribe((response: any) => {
+    deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
+        this._http.delete(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID).subscribe((response: any) => {
             this._dataStore.data.forEach((t, index) => {
                 if (t.ID === entity.ID) { this._dataStore.data.splice(index, 1); }
             });
@@ -172,15 +215,15 @@ export class RhetosRestService<T extends IDataStructure> implements EntityDataSe
         }, (error: any) => console.log('Could not delete entity.'));
     }
 
-    filterData(filters: FieldFilter[]): Promise<T[]> {
-        return this._http.get(AppSettings.API_ENDPOINT + this.getModuleName() + '/' + this.getEntityName()
+    filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<typeof DataStructure[]> {
+        return this._http.get(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure)
                 + '/?genericfilter=[' + filters.map(filter => FieldFilter.toRhetosRESTQueryString(filter)).join() + ']')
             .map(
             (data) => {
-                return Array.from(data.json().Records, (rec: T) => this.fromRawEntity(rec));
+                return Array.from(data.json().Records, (rec: any) => (this.fromRawEntity(DataStructure, (rec as IDataStructure)) as any));
             }, (error: any) => {
                 console.log('Could not filter data. ERR: ' + error.toString());
-                return this.createEntityInstance(null);
+                return this.createEntityInstance(DataStructure, null);
             }
             ).toPromise();
     }

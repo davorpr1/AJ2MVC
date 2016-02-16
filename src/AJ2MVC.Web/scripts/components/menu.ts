@@ -3,7 +3,7 @@ import { FORM_DIRECTIVES } from 'angular2/common';
 import { bootstrap } from 'angular2/platform/browser';
 import { TOOLTIP_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 import { TestLogger } from './../components/logger';
-import { IDataStructure, EntityDataService } from './../models/interfaces';
+import { IDataStructure, IEntityDataService } from './../models/interfaces';
 
 export class Storage<T> {
     public data: Array<T> = new Array<T>();

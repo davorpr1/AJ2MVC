@@ -9,9 +9,7 @@ import 'rxjs/add/operator/toPromise';
 import { AppSettings } from './../app/app.settings';
 
 import { MyClaim } from './../models/security/claim';
-import { IDataStructure } from './../models/interfaces';
-
-import { FieldFilter } from './../services/rhetos-rest.service';
+import { IDataStructure, FieldFilter } from './../models/interfaces';
 
 @Injectable()
 export class PermissionProvider

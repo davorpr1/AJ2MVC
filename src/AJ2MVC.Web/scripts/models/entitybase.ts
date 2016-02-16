@@ -2,16 +2,16 @@
 
 import { EventEmitter } from 'angular2/core';
 import { Validators, Validator } from 'angular2/common';
-import { IDataStructure } from './../models/interfaces';
+import { IDataStructure, FieldDefinition } from './../models/interfaces';
 
 export class BaseEntity implements IDataStructure {
-
     public ID: string;
+    
     getValidators(): { [propName: string]: Function[]; } {
         return {
         };
     }
-    get browseFields(): Array<string> { return ["ID"]; }
+    get browseFields(): Array<FieldDefinition> { return [{ Name: "ID", Pipe: "" }]; }
     getNewInstance(): IDataStructure { throw "Has to be overriden."; }
     getModuleName(): string { return ""; }
     getEntityName(): string { return ""; }

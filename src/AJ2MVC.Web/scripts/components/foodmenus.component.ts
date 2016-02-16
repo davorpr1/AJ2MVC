@@ -15,7 +15,7 @@ import { FoodMenuDetailComponent } from './../components/foodmenu-detail.compone
 })
 @RouteConfig([
         { path: 'list/', name: 'FoodMenuList', component: FoodMenuListComponent, useAsDefault: true },
-        { path: 'detail/:id', name: 'FoodMenuDetail', component: FoodMenuDetailComponent }
+        { path: 'detail/:id', name: 'FoodOrder_FoodMenu_DetailComponent', component: FoodMenuDetailComponent }
 ])
 export class FoodMenusComponent {
 

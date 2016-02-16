@@ -6,8 +6,7 @@ import { FoodMenu } from './../models/foodmenu';
 import { Restaurant } from './../models/restaurant';
 import { DatePickerComponent } from './../controls/datepicker.control';
 import { AutocompleteComponent } from './../controls/autocomplete.control';
-import { RestaurantsService } from './../services/restaurants.service';
-import { FoodMenuService } from './../services/foodmenu.service';
+import { IEntityDataService, IEmptyConstruct } from './../models/interfaces';
 
 @Component({
     directives: [FORM_DIRECTIVES, DatePickerComponent, AutocompleteComponent],
@@ -35,7 +34,7 @@ import { FoodMenuService } from './../services/foodmenu.service';
 
               <div class="form-group">
                 <label for="Restaurant">Restaurant</label>
-                <autocomplete [(ngModel)]="foodMenu.RestaurantID" (onSelected)="logValue($event)" [dataSource]="restaurantService"></autocomplete>
+                <autocomplete [(ngModel)]="foodMenu.RestaurantID" (onSelected)="logValue($event)" [dataSource]="entityService" [entityType]="restaurantType"></autocomplete>
               </div>
 
             <div *ngIf="!foodMenuForm.valid && foodMenuForm.dirty"  
@@ -51,6 +50,7 @@ export class FoodMenuDetailComponent {
     private foodMenu: FoodMenu = new FoodMenu();
     private foodMenuForm: ControlGroup;
     private nameControl: AbstractControl;
+    private restaurantType: IEmptyConstruct = Restaurant;
     private activeFromControl: AbstractControl;
     private activeUntilControl: AbstractControl;
      
@@ -67,19 +67,18 @@ export class FoodMenuDetailComponent {
     constructor(private logger: TestLogger,
         routeParams: RouteParams,
         private router: Router,
-        private foodMenuService: FoodMenuService,
-        private restaurantService: RestaurantsService,
+        private entityService: IEntityDataService,
         private fb: FormBuilder,
         private applicationRef: ApplicationRef    )
     {
         this._id = routeParams.get("id");
 
-        this.foodMenuService.data$.subscribe(updatedFoodMenus => {
-            this.foodMenu = updatedFoodMenus.find(rest => rest.ID === this._id);
+        this.entityService.data$.subscribe(updatedFoodMenus => {
+            this.foodMenu = updatedFoodMenus.find(menu => menu.ID === this._id && (menu instanceof FoodMenu)) as FoodMenu;
             if (!this.foodMenu) this.foodMenu = new FoodMenu();
             this.applicationRef.tick();
         });
-        this.foodMenuService.fetchEntity(this._id).then((_fm: FoodMenu) => {
+        this.entityService.fetchEntity(FoodMenu, this._id).then((_fm: FoodMenu) => {
             this.foodMenu = _fm;
         });
 
@@ -104,7 +103,7 @@ export class FoodMenuDetailComponent {
     }
 
     onSubmit() {
-        this.foodMenuService.updateEntity(this.foodMenu);
+        this.entityService.updateEntity(FoodMenu, this.foodMenu);
         this.router.navigate(['FoodMenuList']);
     }
 }

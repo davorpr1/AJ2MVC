@@ -4,6 +4,7 @@ import { EventEmitter } from 'angular2/core';
 import { Validators, Control } from 'angular2/common';
 
 import { BaseEntity } from './../models/entitybase';
+import { FieldDefinition } from './../models/interfaces';
 
 function containsCommaValidator(control: Control): { [s: string]: boolean } {
     if (!control.value || !control.value.match(/[A-Za-z0-9 ]\,[ A-Za-z]/)) {
@@ -19,8 +20,9 @@ export class Restaurant extends BaseEntity {
     public DateOpened: string;
     public DateClosed: string;
 
-    public ID: string;    
-    get browseFields(): Array<string> { return ["Name", "Address", "WebSite"];}
+    public ID: string;
+
+    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "" }, { Name: "Address", Pipe: "" }, { Name: "WebSite", Pipe: "" }]; }
 
     getNewInstance(): Restaurant { return new Restaurant(); }
     getModuleName(): string { return "FoodOrder"; }

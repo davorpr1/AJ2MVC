@@ -1,6 +1,11 @@
-﻿import { Pipe, PipeTransform } from 'angular2/core';
+﻿/// <reference path="../../typings/moment.d.ts" />
+
+import { Pipe, PipeTransform } from 'angular2/core';
 import { ModelA } from './../models/modela';
 import { TestLogger } from './../components/logger';
+
+import * as momment_ from 'moment';
+const moment: moment.MomentStatic = (<any>momment_)["default"] || momment_;
 
 @Pipe({
     name: 'ModelASHTML'
@@ -32,5 +37,14 @@ export class ExponentialStrengthPipe implements PipeTransform {
     transform(value: number, args: string[]): any {
         console.log('expPipeTransform requested for ' + value + ', ' + args);
         return Math.pow(value, isNaN(parseFloat(args[0])) ? 1 : parseFloat(args[0]) );
+    }
+}
+
+@Pipe({ name: 'msdate' })
+export class MSDatePipe implements PipeTransform {
+
+    transform(value: string, args: string[]): any {
+        console.log('msDateTransform requested for ' + value + ', ' + args);
+        return moment(value).toDate().toLocaleDateString('hr');
     }
 }

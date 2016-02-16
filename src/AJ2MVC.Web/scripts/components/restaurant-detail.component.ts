@@ -4,8 +4,7 @@ import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod,
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
 import { Restaurant } from './../models/restaurant';
-import { EntityDataService } from './../models/interfaces';
-import { EntityDataServiceFactory } from './../factories/entity-data-service.factory';
+import { IEntityDataService } from './../models/interfaces';
 
 @Component({
     directives: [FORM_DIRECTIVES],
@@ -37,26 +36,23 @@ export class RestaurantDetailComponent implements OnInit {
     private restaurant: Restaurant = new Restaurant();
     private restaurantForm: ControlGroup;
     private nameControl: AbstractControl;
-    private restaurantService: EntityDataService;
     private addressControl: AbstractControl;
 
     constructor(private logger: TestLogger,
         routeParams: RouteParams,
         private router: Router,
         private http: Http,
-        private entityServiceFactory: EntityDataServiceFactory,
+        private entityService: IEntityDataService,
         private fb: FormBuilder    )
     {
-        this.restaurantService = entityServiceFactory.getInstanceForEntity(new Restaurant());
-
         this._id = routeParams.get("id");
 
-        this.restaurantService.data$.subscribe(updatedRestaurants => {
-            this.restaurant = updatedRestaurants.find(rest => rest.ID === this._id);
+        this.entityService.data$.subscribe(updatedRestaurants => {
+            this.restaurant = updatedRestaurants.find(rest => rest.ID === this._id && rest instanceof Restaurant) as Restaurant;
             if (!this.restaurant) this.restaurant = new Restaurant();
         });
-        this.restaurantService.fetchEntity(this._id).then((_rest: Restaurant) => {
-            this.restaurant = _rest;
+        this.entityService.fetchEntity(Restaurant, this._id).then((_rest: any) => {
+            this.restaurant = _rest as Restaurant;
         });
 
         this.restaurantForm = fb.group({
@@ -70,7 +66,7 @@ export class RestaurantDetailComponent implements OnInit {
     }
 
     onSubmit() {
-        this.restaurantService.updateEntity(this.restaurant);
+        this.entityService.updateEntity(Restaurant, this.restaurant);
         this.router.navigate(['RestaurantList']);
     }
 

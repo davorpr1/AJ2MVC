@@ -1,23 +1,44 @@
-﻿import { Component, View, provide, OnInit, AfterViewInit, NgZone, ApplicationRef, Input, ChangeDetectorRef } from 'angular2/core';
+﻿import { Component, View, provide, OnInit, AfterViewInit, NgZone, ApplicationRef, Input, ChangeDetectorRef, Pipe, PipeTransform } from 'angular2/core';
+import { DatePipe } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
-import { IDataStructure, EntityDataService } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldDefinition } from './../models/interfaces';
 import { GlobalDataSharing, MenuItem } from './../components/menu';
-import { EntityDataServiceFactory } from './../factories/entity-data-service.factory';
+import { MSDatePipe } from './../pipes/ModelASHTMLPipe';
+import { BaseEntity } from './../models/entitybase';
+
+@Pipe({ name: 'pipeWrapper' })
+export class WrapperPipe implements PipeTransform {
+    registeredPipes: Map<string, PipeTransform> = new Map<string, PipeTransform>();
+    constructor() {
+        if (!this.registeredPipes.get("date")) this.registeredPipes.set("date", new DatePipe());
+        if (!this.registeredPipes.get("msDate")) this.registeredPipes.set("msDate", new MSDatePipe());
+    }
+
+    transform(value: string, args: string[]): any {
+        if (!args || args.length === 0 || !args[0] || args[0].length === 0) return value; else {
+            let pipes: string[] = args[0].split(',');
+            for (var ix: number = 0; ix < pipes.length; ix++)
+                if (this.registeredPipes.get(pipes[ix])) value = this.registeredPipes.get(pipes[ix]).transform(value, null);
+            return value;
+        }
+    }
+}
 
 @Component({
     selector: 'entity-list',
     providers: [ChangeDetectorRef],
+    pipes: [WrapperPipe],
     template: `
         <p>Entity list</p>
         <table class="baseTable">
             <tr>
-                <th *ngFor="#browseField of fields">{{browseField}}</th>
+                <th *ngFor="#browseField of fields">{{browseField.Name}}</th>
                 <th>About</th>
             </tr>
             <tr *ngFor="#entityObj of showEntityList" >
-                <td *ngFor="#browseField of fields">{{entityObj[browseField]}}</td>
+                <td *ngFor="#browseField of fields">{{entityObj[browseField.Name] | pipeWrapper:browseField.Pipe}}</td>
                 <td><a (click)="openDetail(entityObj)">Details</a></td>
             </tr>
         </table>
@@ -27,51 +48,52 @@ import { EntityDataServiceFactory } from './../factories/entity-data-service.fac
 })
 export class EntityListComponent implements OnInit, AfterViewInit {
     private showEntityList: Array<IDataStructure> = new Array<IDataStructure>();
-    private showEntity: IDataStructure;
-    private fields: Array<string> = new Array<string>();
-    private entityService: EntityDataService;
+    private showEntity: IDataStructure = new BaseEntity();
+    private EntityDataStructure: IEmptyConstruct = BaseEntity;
+    private fields: Array<FieldDefinition> = new Array<FieldDefinition>();
     private _rerenderRequired: boolean = true;
-    private cd: number = 1;
+    private cd: number = 0;
 
     constructor(private logger: TestLogger,
         gds: GlobalDataSharing,
         private http: Http,
         private router: Router,
-        private entityServiceFactory: EntityDataServiceFactory,
+        private entityService: IEntityDataService,
         private zone: NgZone,
         private applicationRef: ApplicationRef)
     {
-        this.registerEntityService();
+        this.registerDataService();
         var that = this;
-
-        setTimeout(function () {
-            that.cd++;
-            // to ensure rerendering view
-            that.applicationRef.tick();
-        }, 100);
+        
+        setInterval(() => {
+            if (this.cd != this.showEntityList.length) {
+                this.cd = this.showEntityList.length;
+                that.applicationRef.tick();
+            }
+        }, 250);
 
         logger.log("Entity list component initiated!");
     }
 
-    @Input() set entity(entity: IDataStructure) {
-        this.showEntity = entity.getNewInstance();
+    @Input() set entityType(EntityType: IEmptyConstruct) {
+        this.showEntity = new EntityType();
+        this.EntityDataStructure = EntityType;
         this.fields = [].concat(this.showEntity.browseFields);
-        this.registerEntityService();
+        this.registerDataService();
     }
 
-    private registerEntityService() {
-        if (this.showEntity && !this.entityService) {
-            this.entityService = this.entityServiceFactory.getInstanceForEntity(this.showEntity);
-            if (this.entityService) {
-                this.entityService.data$.subscribe((updatedEntities: Array<IDataStructure>) => this.showEntityList = updatedEntities);
-                this.entityService.initdataLoad();
-                this.showEntityList = this.entityService.getCurrentLibrary();
-            }
+    private registerDataService() {
+        if (this.showEntity) {
+            this.entityService.data$.subscribe((updatedEntities: Array<any>) => {
+                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+            });
+            this.entityService.initdataLoad(this.EntityDataStructure);
+            this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
         }
     }
 
     triggerRefreshData() {
-        this.entityService.reloadData();
+        this.entityService.reloadData(this.EntityDataStructure);
     }
 
     newEntity() {

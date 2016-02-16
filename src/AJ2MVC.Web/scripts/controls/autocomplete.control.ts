@@ -4,7 +4,7 @@
 import { Component, View, provide, AfterViewInit, ElementRef, Input, Output, EventEmitter} from 'angular2/core';
 import { ControlValueAccessor, NgModel, FORM_DIRECTIVES } from 'angular2/common';
 
-import { RhetosRestService, FieldFilter } from './../services/rhetos-rest.service';
+import { IEntityDataService, IEmptyConstruct, FieldFilter } from './../models/interfaces';
 
 declare var jQuery: JQueryStatic;
 
@@ -21,7 +21,8 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterViewIni
     private onTouched: Function;
     private elRef: ElementRef;
     @Output() private onSelected: EventEmitter<string> = new EventEmitter<string>();
-    @Input() private dataSource: RhetosRestService<any>;
+    @Input() private dataSource: IEntityDataService;
+    @Input() private entityType: IEmptyConstruct;
 
     constructor(element: ElementRef, cd: NgModel) {
         cd.valueAccessor = this;
@@ -34,7 +35,7 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterViewIni
         if (this._id !== newValue) {
             this._id = newValue;
             this.cd.viewToModelUpdate(newValue);
-            this.dataSource.fetchEntity(newValue).then((rest: any) => { this._value = rest.Name; });
+            this.dataSource.fetchEntity(this.entityType, newValue).then((rest: any) => { this._value = rest.Name; });
         }
     }
 
@@ -42,7 +43,7 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterViewIni
         if (!valueID) { return; }
         if (!this._id || this._id !== valueID) {
             this._id = valueID;
-            this.dataSource.fetchEntity(valueID).then((rest: any) => { this._value = rest.Name; });
+            this.dataSource.fetchEntity(this.entityType, valueID).then((rest: any) => { this._value = rest.Name; });
         }
     }
     
@@ -62,7 +63,7 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterViewIni
         var that = this;
         jQuery(this.elRef.nativeElement).find("#inputCon").autocomplete({
             source: function (request: any, response: any) {
-                that.dataSource.filterData([{ Field: "Name", Operator: "contains", Term: request.term }]).then(
+                that.dataSource.filterData(that.entityType, [{ Field: "Name", Operator: "contains", Term: request.term }]).then(
                     (res: any[]) => {
                         response(Array.from(res, (rec: any) => { return { value: rec.Name, id: rec.ID } }));
                     }
