@@ -12,6 +12,12 @@ function containsCommaValidator(control: Control): { [s: string]: boolean } {
     }
 }
 
+function urlValidator(control: Control): { [s: string]: boolean } {
+    if (!control.value || !control.value.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/)) {
+        return { notValidURL: true };
+    }
+}
+
 export class Restaurant extends BaseEntity {
     public Name: string;
     public Address: string;
@@ -31,7 +37,8 @@ export class Restaurant extends BaseEntity {
     public getValidators(): { [propName: string]: Function[]; } {
         return {
             "Name": [Validators.required, Validators.minLength(3)],
-            "Address": [Validators.required, containsCommaValidator]
+            "Address": [Validators.required, containsCommaValidator],
+            "WebSite": [Validators.required, urlValidator]
         };
     }
 

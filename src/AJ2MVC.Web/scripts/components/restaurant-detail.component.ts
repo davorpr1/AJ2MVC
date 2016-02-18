@@ -1,10 +1,12 @@
-﻿import { Component, OnInit } from 'angular2/core';
+﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef } from 'angular2/core';
 import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
 import { Restaurant } from './../models/restaurant';
-import { IEntityDataService } from './../models/interfaces';
+import { IEntityDataService, IEntityContainer } from './../models/interfaces';
+
+import { RestaurantCustomizationComponent } from './../components/generic-detail.component';
 
 @Component({
     directives: [FORM_DIRECTIVES],
@@ -12,6 +14,7 @@ import { IEntityDataService } from './../models/interfaces';
             <br />
             <p>{{restaurant.Name}}</p>
             <form [ngFormModel]="restaurantForm" (ngSubmit)="onSubmit()">
+              <div #formStart></div>
               <div class="form-group">
                 <label for="Name">Name</label>
                 <input ngControl="Name" type="text" [(ngModel)]="restaurant.Name">
@@ -27,14 +30,14 @@ import { IEntityDataService } from './../models/interfaces';
             <div *ngIf="!restaurantForm.valid && restaurantForm.dirty"  
                     class="alert alert-danger">Restaurant data is not valid</div>
 
-              <button type="submit" class="btn btn-default" [disabled]="!restaurantForm.valid">Submit</button>
+              <button type="submit" class="btn btn-default" [disabled]="!restaurantForm.dirty || !restaurantForm.valid">Submit</button>
             </form>
         `
 })
-export class RestaurantDetailComponent implements OnInit {
+export class RestaurantDetailComponent implements OnInit, IEntityContainer {
     private _id: string;
-    private restaurant: Restaurant = new Restaurant();
-    private restaurantForm: ControlGroup;
+    public entity: Restaurant = new Restaurant();
+    public restaurantForm: ControlGroup;
     private nameControl: AbstractControl;
     private addressControl: AbstractControl;
 
@@ -43,21 +46,23 @@ export class RestaurantDetailComponent implements OnInit {
         private router: Router,
         private http: Http,
         private entityService: IEntityDataService,
+        private dynamicComponentLoader: DynamicComponentLoader,
+        public elementRef: ElementRef,
         private fb: FormBuilder    )
     {
         this._id = routeParams.get("id");
 
         this.entityService.data$.subscribe(updatedRestaurants => {
-            this.restaurant = updatedRestaurants.find(rest => rest.ID === this._id && rest instanceof Restaurant) as Restaurant;
-            if (!this.restaurant) this.restaurant = new Restaurant();
+            this.entity = updatedRestaurants.find(rest => rest.ID === this._id && rest instanceof Restaurant) as Restaurant;
+            if (!this.entity) this.entity = new Restaurant();
         });
         this.entityService.fetchEntity(Restaurant, this._id).then((_rest: any) => {
-            this.restaurant = _rest as Restaurant;
+            this.entity = _rest as Restaurant;
         });
 
         this.restaurantForm = fb.group({
-            Name: ["", Validators.compose(this.restaurant.getValidators()["Name"])],
-            Address: ["", Validators.compose(this.restaurant.getValidators()["Address"])]
+            Name: ["", Validators.compose(this.entity.getValidators()["Name"])],
+            Address: ["", Validators.compose(this.entity.getValidators()["Address"])]
         });
         this.nameControl = this.restaurantForm.controls['Name'];
         this.addressControl = this.restaurantForm.controls['Address'];
@@ -66,11 +71,19 @@ export class RestaurantDetailComponent implements OnInit {
     }
 
     onSubmit() {
-        this.entityService.updateEntity(Restaurant, this.restaurant);
+        this.entityService.updateEntity(Restaurant, this.entity);
         this.router.navigate(['RestaurantList']);
     }
 
     ngOnInit() {
+        var that = this;
+        // TODO: load registered components to be loaded
+        this.dynamicComponentLoader.loadIntoLocation(RestaurantCustomizationComponent, this.elementRef, 'formStart').then(
+            (newComp: ComponentRef) => {
+                that.logger.log("Custom component loaded: " + (newComp.instance as RestaurantCustomizationComponent).customStaticRefID);
+                (newComp.instance as RestaurantCustomizationComponent).setContainerForm(that);
+            }
+        );
         // Something cheerful...
     }
 }

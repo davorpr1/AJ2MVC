@@ -58,3 +58,13 @@ export abstract class IEntityDataService {
     abstract deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
     abstract filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<any[]>;
 }
+
+@Injectable()
+export abstract class IOverrideDetailComponent {
+    abstract setContainerForm(containerForm: IEntityContainer): void;
+    abstract getPlaceHolder(): string;
+}
+
+export class IEntityContainer {
+    public entity: IDataStructure;
+}
