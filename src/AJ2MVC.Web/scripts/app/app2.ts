@@ -2,6 +2,7 @@
 /// <reference path="../../typings/jqueryui/jqueryui.d.ts" />
 
 import {Component, provide, Injectable, ElementRef, AfterViewInit} from 'angular2/core';
+import {FORM_PROVIDERS, NgModel} from 'angular2/common';
 import { RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS, Router, HashLocationStrategy, LocationStrategy } from 'angular2/router';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import {bootstrap} from 'angular2/platform/browser';
@@ -86,7 +87,7 @@ bootstrap(App2Component, [
 
     provide(TestLogger, { useClass: TestLogger }),
     provide(GlobalDataSharing, { useClass: GlobalDataSharing }),
-    HTTP_PROVIDERS, ROUTER_PROVIDERS,
+    HTTP_PROVIDERS, ROUTER_PROVIDERS, FORM_PROVIDERS, NgModel,
     provide(BrowserXhr, { useClass: CORSBrowserXHr }),
     provide(LocationStrategy, { useClass: HashLocationStrategy })
 ]);

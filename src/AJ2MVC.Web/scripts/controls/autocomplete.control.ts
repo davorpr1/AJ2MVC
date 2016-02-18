@@ -1,67 +1,51 @@
 /// <reference path="../../typings/jquery/jquery.d.ts" />
 /// <reference path="../../typings/jqueryui/jqueryui.d.ts" />
 
-import { Component, View, provide, AfterViewInit, ElementRef, Input, Output, EventEmitter} from 'angular2/core';
-import { ControlValueAccessor, NgModel, FORM_DIRECTIVES } from 'angular2/common';
-
-import { IEntityDataService, IEmptyConstruct, FieldFilter } from './../models/interfaces';
+import { Input, Output, HostBinding, AfterViewInit, HostListener, EventEmitter, Component, Self, Attribute, ViewEncapsulation, ElementRef } from 'angular2/core';
+import { ControlValueAccessor, NgControl } from 'angular2/common';
+import { IEntityDataService, IEmptyConstruct } from './../models/interfaces';
 
 declare var jQuery: JQueryStatic;
 
 @Component({
-    selector: "autocomplete[ngModel]",
-    directives: [FORM_DIRECTIVES],
-    template: `<input id="inputCon" (keyup)="autocompleteValueChange($event, d)" [value]="_value">`
+    selector: 'autocomplete[ngControl], autocomplete[ngFormControl], autocomplete[ngModel]',
+    encapsulation: ViewEncapsulation.Emulated,
+    template: `<input id="inputCon" type="text" [(value)]="_idString">`
 })
 export class AutocompleteComponent implements ControlValueAccessor, AfterViewInit {
-    _value: string = "";
-    _id: string;
-    cd: NgModel;
-    private onChange: Function;
-    private onTouched: Function;
-    private elRef: ElementRef;
+    @Input('id') _id: string = "";
+    @Output('change') onChange: EventEmitter<any> = new EventEmitter();
     @Output() private onSelected: EventEmitter<string> = new EventEmitter<string>();
+
+    @HostListener('blur', ['$event'])
+    onTouched: Function;
+    private _controlID: number;
+    private static staticID: number = 1;
+    private _idString: string = "";
     @Input() private dataSource: IEntityDataService;
     @Input() private entityType: IEmptyConstruct;
 
-    constructor(element: ElementRef, cd: NgModel) {
-        cd.valueAccessor = this;
-        this.cd = cd;
-        this.elRef = element;
+    constructor( @Self() cd: NgControl, private elRef: ElementRef) {
+        cd.valueAccessor = this; // Validation will not work if we don't set the control's value accessor
+        this._controlID = ++AutocompleteComponent.staticID;
     }
-
-    get valueID(): string { return this._id; }
-    set valueID(newValue: string) {
-        if (this._id !== newValue) {
-            this._id = newValue;
-            this.cd.viewToModelUpdate(newValue);
-            this.dataSource.fetchEntity(this.entityType, newValue).then((rest: any) => { this._value = rest.Name; });
-        }
+    registerOnChange(fn: (_: any) => void): void {
+        this.onChange.subscribe(fn);
     }
-
-    writeValue(valueID: string): void {
+    registerOnTouched(fn: () => void): void {
+        this.onTouched = fn;
+    }
+    writeValue(valueID: any): void {
         if (!valueID) { return; }
         if (!this._id || this._id !== valueID) {
             this._id = valueID;
-            this.dataSource.fetchEntity(this.entityType, valueID).then((rest: any) => { this._value = rest.Name; });
+            this.dataSource.fetchEntity(this.entityType, valueID).then((rest: any) => { this._idString = rest.Name; });
         }
     }
-    
-    registerOnChange(fn: (_: any) => {}): void {
-        this.onChange = fn;
-    }
-
-    registerOnTouched(fn: (_: any) => {}): void {
-        this.onTouched = fn;
-    }
-
-    autocompleteValueChange(event: any, bla: any) {
-        console.log(event);
-    }
-
     ngAfterViewInit() {
         var that = this;
-        jQuery(this.elRef.nativeElement).find("#inputCon").autocomplete({
+        jQuery(this.elRef.nativeElement).find("#inputCon").attr('id', 'inputCon_SuperAC_' + this._controlID);
+        jQuery(this.elRef.nativeElement).find('#inputCon_SuperAC_' + this._controlID).autocomplete({
             source: function (request: any, response: any) {
                 that.dataSource.filterData(that.entityType, [{ Field: "Name", Operator: "contains", Term: request.term }]).then(
                     (res: any[]) => {
@@ -73,15 +57,21 @@ export class AutocompleteComponent implements ControlValueAccessor, AfterViewIni
             },
             minLength: 2,
             select: function (event, ui) {
-                console.log(ui.item ?
-                    "Selected: " + ui.item.value + " aka " + ui.item.id :
-                    "Nothing selected, input was " + this.value);
-                that.valueID = ui.item.id;
+                that.onChange.next(ui.item.id);
+                that._idString = ui.item.value;
                 that.onSelected.next(ui.item.id);
             },
             focus: function (event, ui) {
                 event.preventDefault();
-                jQuery(that.elRef.nativeElement).find("#inputCon").val(ui.item.value);
+                jQuery(that.elRef.nativeElement).find('#inputCon_SuperAC_' + that._controlID).val(ui.item.value);
+            },
+            change: function (event, ui) {
+                if (that._idString != jQuery(that.elRef.nativeElement).find('#inputCon_SuperAC_' + that._controlID).val())
+                {
+                    jQuery(that.elRef.nativeElement).find('#inputCon_SuperAC_' + that._controlID).val("");
+                    that._idString = "";
+                    that.onChange.next(null);
+                }
             }
         });
     }

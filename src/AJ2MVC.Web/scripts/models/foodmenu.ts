@@ -14,7 +14,13 @@ export class FoodMenu extends BaseEntity {
     public RestaurantID: string;
     public ID: string;    
 
-    public ActiveFromDate: Date = null;
+    private _activeFromDate: Date;
+    public get ActiveFromDate(): Date { return this._activeFromDate; }
+    public set ActiveFromDate(value: Date) {
+        this._activeFromDate = value;
+        if (formatMSDate(this._activeFromDate) != this.ActiveFrom)
+            this.ActiveFrom = formatMSDate(this._activeFromDate);
+    }
     public ActiveUntilDate: Date = null;
 
     get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "" }, { Name: "ActiveFrom", Pipe: "msDate" }]; }

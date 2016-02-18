@@ -47,6 +47,13 @@ label {
   display: block;
 }
 
+checkbox[aria-checked="true"] > div {
+    background-color: blue;
+}
+checkbox[aria-checked="false"] > div {
+    background-color: red;
+}
+
 input, button {
   display: block;
 }
