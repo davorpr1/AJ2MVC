@@ -1,6 +1,6 @@
 ﻿import {Provider, provide, Injector, OpaqueToken, Injectable, NoProviderError, OnInit } from 'angular2/core';
 import { GlobalDataSharing, Storage } from './../components/menu';
-import { OverrideComponentDescriptor, IOverrideDetailComponent, IEmptyConstruct } from './../models/interfaces';
+import { OverrideComponentDescriptor, IOverrideDetailComponent, IEmptyConstruct, DecoratorRegistrations } from './../models/interfaces';
 
 @Injectable()
 export class ComponentOverridesFactory {
@@ -10,6 +10,8 @@ export class ComponentOverridesFactory {
     constructor(private globalDataShare: GlobalDataSharing) {
         console.log('ComponentOverridesFactory instatinated!');
         this.registeredOverrides = this.globalDataShare.getSharedData<OverrideComponentDescriptor>("ComponentDetailOverrides");
+        DecoratorRegistrations.registeredOverrides.data.map(exDecorated => this.registeredOverrides.data.push(exDecorated));
+
         this._plainOverrides = this.registeredOverrides.data;
 
         this.registeredOverrides.OnUpdate.subscribe((newItem: OverrideComponentDescriptor) => {

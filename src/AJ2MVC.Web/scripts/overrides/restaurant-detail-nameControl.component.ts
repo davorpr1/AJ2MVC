@@ -1,12 +1,16 @@
 ﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Inject, forwardRef } from 'angular2/core';
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { TestLogger } from './../components/logger';
-import { IEntityContainer, IOverrideDetailComponent } from './../models/interfaces';
+import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent } from './../models/interfaces';
 import { RestaurantDetailComponent } from './../components/restaurant-detail.component';
 
 @Component({
     directives: [FORM_DIRECTIVES],
     template: ``
+})
+@OverrideDetailComponent({
+    hostComponent: RestaurantDetailComponent,
+    targetPlaceHolder: "DEFAULTANCHOR"
 })
 export class RestaurantDetailNameLabelOverrideComponent extends IOverrideDetailComponent {
     constructor(private logger: TestLogger,

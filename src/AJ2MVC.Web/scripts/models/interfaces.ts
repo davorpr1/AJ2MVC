@@ -1,6 +1,7 @@
 ﻿import { Injectable } from 'angular2/core';
 import { Validator } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
+import { Storage } from './../components/menu';
 
 export interface IEmptyConstruct {
     new (): any;
@@ -72,4 +73,20 @@ export class IOverrideDetailComponent {
 
 export class IEntityContainer {
     public entity: IDataStructure;
+}
+
+export class DecoratorRegistrations {
+    static registeredOverrides: Storage<OverrideComponentDescriptor> = new Storage<OverrideComponentDescriptor>();
+}
+
+export class OverrideDetailComponentMetadata {
+    hostComponent: any;
+    targetPlaceHolder: string;
+}
+
+export function OverrideDetailComponent(params: OverrideDetailComponentMetadata) {
+    return (target: any) => {
+        DecoratorRegistrations.registeredOverrides.data.push({ hostComponentDescriptor: params.hostComponent.name, overrideComponent: target });
+        console.log(' ***** Override detail component registered: ' + target + ', args: ' + params.hostComponent + ' -> ' + params.targetPlaceHolder);
+    }
 }
