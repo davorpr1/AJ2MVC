@@ -20,7 +20,10 @@ import { PermissionProvider } from './../services/permission-provider.service';
 
 import { FoodMenu } from './../models/foodmenu';
 import { Restaurant } from './../models/restaurant';
-import { IDataStructure, IEntityDataService } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, OverrideComponentDescriptor } from './../models/interfaces';
+import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
+import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
+import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
 
 declare var jQuery: JQueryStatic;
 
@@ -59,6 +62,9 @@ class App2Component implements AfterViewInit, IRouteMechanism {
         newMenuItem.RouteMechanism = this;
         newMenuItem.Tooltip = "Basic table to show all the food menus";
         gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
+
+        gds.addSharedData<OverrideComponentDescriptor>("ComponentDetailOverrides", { hostComponentDescriptor: "RestaurantDetailComponent", overrideComponent: RestaurantDetailCustomWebsiteControlComponent });
+        gds.addSharedData<OverrideComponentDescriptor>("ComponentDetailOverrides", { hostComponentDescriptor: "RestaurantDetailComponent", overrideComponent: RestaurantDetailNameLabelOverrideComponent });
     }
 
     handleNavigation(link: string) {
@@ -81,7 +87,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 }
 
 bootstrap(App2Component, [
-    RhetosRestService, PermissionProvider, LocalStorageService,
+    RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory,
 
     provide(IEntityDataService, { useClass: RhetosRestService }),
 

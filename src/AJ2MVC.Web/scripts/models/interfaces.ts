@@ -59,10 +59,15 @@ export abstract class IEntityDataService {
     abstract filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<any[]>;
 }
 
+export class OverrideComponentDescriptor {
+    hostComponentDescriptor: string;
+    overrideComponent: any;
+}
+
 @Injectable()
-export abstract class IOverrideDetailComponent {
-    abstract setContainerForm(containerForm: IEntityContainer): void;
-    abstract getPlaceHolder(): string;
+export class IOverrideDetailComponent {
+    static PlaceHolder: string = "DEFAULTANCHOR";
+    getInstanceID(): string { return "NotDefined"; }
 }
 
 export class IEntityContainer {

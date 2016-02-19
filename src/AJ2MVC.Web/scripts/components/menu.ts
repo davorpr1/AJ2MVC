@@ -15,7 +15,7 @@ export class Storage<T> {
 export class GlobalDataSharing {
     private static _storages: Map<string, Storage<any>>;
 
-    addSharedData<T>(storageName: string, addedData: any) {
+    addSharedData<T>(storageName: string, addedData: T) {
         if (!GlobalDataSharing._storages.has(storageName))
             GlobalDataSharing._storages.set(storageName, new Storage<T>());
 

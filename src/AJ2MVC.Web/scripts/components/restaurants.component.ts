@@ -2,7 +2,7 @@
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
 import { RestaurantListComponent } from './../components/restaurant-list.component';
-import { RestaurantDetailComponent } from './../components/restaurant-detail.component';
+import { RestaurantWrapperComponent } from './../components/restaurant-wrapper.component';
 
 @Component({
     directives: [ROUTER_DIRECTIVES],
@@ -15,7 +15,7 @@ import { RestaurantDetailComponent } from './../components/restaurant-detail.com
 })
 @RouteConfig([
     { path: 'list/', name: 'RestaurantList', component: RestaurantListComponent, useAsDefault: true },
-    { path: 'detail/:id', name: 'FoodOrder_Restaurant_DetailComponent', component: RestaurantDetailComponent }
+    { path: 'detail/:id', name: 'FoodOrder_Restaurant_DetailComponent', component: RestaurantWrapperComponent }
 ])
 export class RestaurantsComponent {
 
