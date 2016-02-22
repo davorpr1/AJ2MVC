@@ -17,13 +17,16 @@ export class OverrideableDetailComponent implements OnInit {
         logger_ODC.log("Overrideable support initiated!");
     }
 
-    getOverrideListeners(): string[] { return [];}
+    getOverrideListeners(): string[] {
+        // get class name from constructor code
+        return [this["constructor"].toString().match(/\w+/g)[1]];
+    }
 
     ngOnInit() {
         var that = this;
         var factory: ComponentOverridesFactory = this.injector_ODC.get(ComponentOverridesFactory);
-        factory.getAllComponentOverrides(this.getOverrideListeners()).map(overrideComponent => {
-            this.dynamicComponentLoader_ODC.loadIntoLocation(overrideComponent, this.elementRef_ODC, (overrideComponent as any).PlaceHolder).then(
+        factory.getAllComponentOverrides(this.getOverrideListeners()).map(desc => {
+            this.dynamicComponentLoader_ODC.loadIntoLocation(desc.overrideComponent, this.elementRef_ODC, desc.hostElementPlaceHolder).then(
                 (newComp: ComponentRef) => {
                     that.logger_ODC.log("Custom component loaded: " + (newComp.instance as IOverrideDetailComponent).getInstanceID());
                 }

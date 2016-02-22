@@ -50,8 +50,8 @@ export class RestaurantDetailComponent extends OverrideableDetailComponent imple
         private router: Router,
         private http: Http,
         private entityService: IEntityDataService,
-        private dynamicComponentLoader: DynamicComponentLoader,
-        private injector: Injector,
+        public dynamicComponentLoader: DynamicComponentLoader,
+        public injector: Injector,
         public elementRef: ElementRef,
         private fb: FormBuilder)
     {
@@ -74,10 +74,6 @@ export class RestaurantDetailComponent extends OverrideableDetailComponent imple
         this.addressControl = this.restaurantForm.controls['Address'];
 
         logger.log("Restaurant detail initiated!");
-    }
-
-    getOverrideListeners(): string[] {
-        return super.getOverrideListeners().concat(["RestaurantDetailComponent"]);
     }
 
     onSubmit() {

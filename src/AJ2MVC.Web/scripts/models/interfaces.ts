@@ -62,6 +62,7 @@ export abstract class IEntityDataService {
 
 export class OverrideComponentDescriptor {
     hostComponentDescriptor: string;
+    hostElementPlaceHolder: string;
     overrideComponent: any;
 }
 
@@ -86,7 +87,7 @@ export class OverrideDetailComponentMetadata {
 
 export function OverrideDetailComponent(params: OverrideDetailComponentMetadata) {
     return (target: any) => {
-        DecoratorRegistrations.registeredOverrides.data.push({ hostComponentDescriptor: params.hostComponent.name, overrideComponent: target });
+        DecoratorRegistrations.registeredOverrides.data.push({ hostComponentDescriptor: params.hostComponent.name, hostElementPlaceHolder: params.targetPlaceHolder, overrideComponent: target });
         console.log(' ***** Override detail component registered: ' + target + ', args: ' + params.hostComponent + ' -> ' + params.targetPlaceHolder);
     }
 }

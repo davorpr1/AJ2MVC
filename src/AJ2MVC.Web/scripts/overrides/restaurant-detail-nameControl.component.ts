@@ -3,25 +3,26 @@ import { FORM_DIRECTIVES } from 'angular2/common';
 import { TestLogger } from './../components/logger';
 import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent } from './../models/interfaces';
 import { RestaurantDetailComponent } from './../components/restaurant-detail.component';
+import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 
 @Component({
     directives: [FORM_DIRECTIVES],
     template: ``
 })
 @OverrideDetailComponent({
-    hostComponent: RestaurantDetailComponent,
+    hostComponent: RestaurantDetailCustomWebsiteControlComponent,
     targetPlaceHolder: "DEFAULTANCHOR"
 })
-export class RestaurantDetailNameLabelOverrideComponent extends IOverrideDetailComponent {
+export class RestaurantDetailNameLabelOverrideComponent implements IOverrideDetailComponent {
     constructor(private logger: TestLogger,
         private elementRef: ElementRef,
-        @Inject(forwardRef(() => RestaurantDetailComponent)) parentComponent: RestaurantDetailComponent
+        @Inject(forwardRef(() => RestaurantDetailCustomWebsiteControlComponent)) parentComponent: RestaurantDetailCustomWebsiteControlComponent
     ) {
-        super();
         // jQuery(jQuery((parentComponent as RestaurantDetailComponent).elementRef.nativeElement).find("[ngcontrol='Name']")).parent().attr("hidden", "hidden");
-        jQuery(jQuery((parentComponent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text(
-            jQuery(jQuery((parentComponent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text() + ' - Super'
+        jQuery(jQuery((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text(
+            jQuery(jQuery((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text() + ' - Super'
         );
         logger.log("Restaurant customization 2 initiated!");
     }
+    getInstanceID(): string { return "NotDefined"; }
 }

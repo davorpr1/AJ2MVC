@@ -21,8 +21,8 @@ export class ComponentOverridesFactory {
     }
 
     // returns Type
-    public getAllComponentOverrides(componentListenerDescriptors: Array<string>): IEmptyConstruct[]
+    public getAllComponentOverrides(componentListenerDescriptors: Array<string>): OverrideComponentDescriptor[]
     {
-        return this._plainOverrides.filter(x => componentListenerDescriptors.indexOf(x.hostComponentDescriptor) >= 0 ).map(x => x.overrideComponent);
+        return this._plainOverrides.filter(x => componentListenerDescriptors.indexOf(x.hostComponentDescriptor) >= 0).map(x => x);
     }
 }

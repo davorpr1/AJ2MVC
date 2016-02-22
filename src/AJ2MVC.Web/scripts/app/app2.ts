@@ -63,8 +63,8 @@ class App2Component implements AfterViewInit, IRouteMechanism {
         newMenuItem.Tooltip = "Basic table to show all the food menus";
         gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
 
-        gds.addSharedData<OverrideComponentDescriptor>("ComponentDetailOverrides", { hostComponentDescriptor: "RestaurantDetailComponent", overrideComponent: RestaurantDetailCustomWebsiteControlComponent });
         let x: any = RestaurantDetailNameLabelOverrideComponent; // just to trigger decorator code
+        x = RestaurantDetailCustomWebsiteControlComponent; // just to trigger decorator code
     }
 
     handleNavigation(link: string) {
