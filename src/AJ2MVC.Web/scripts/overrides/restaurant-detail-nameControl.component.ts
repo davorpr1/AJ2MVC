@@ -18,10 +18,8 @@ export class RestaurantDetailNameLabelOverrideComponent implements IOverrideDeta
         private elementRef: ElementRef,
         @Inject(forwardRef(() => RestaurantDetailCustomWebsiteControlComponent)) parentComponent: RestaurantDetailCustomWebsiteControlComponent
     ) {
-        // jQuery(jQuery((parentComponent as RestaurantDetailComponent).elementRef.nativeElement).find("[ngcontrol='Name']")).parent().attr("hidden", "hidden");
-        jQuery(jQuery((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text(
-            jQuery(jQuery((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement).find("label[for='Name']")).text() + ' - Super'
-        );
+        ((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement as HTMLElement).querySelectorAll("label[for='Name'").item(0).textContent += ' - Super';
+
         logger.log("Restaurant customization 2 initiated!");
     }
     getInstanceID(): string { return "NotDefined"; }
