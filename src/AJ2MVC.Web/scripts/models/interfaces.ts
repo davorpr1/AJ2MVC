@@ -10,6 +10,7 @@ export interface IEmptyConstruct {
 export class FieldDefinition {
     Name: string;
     Pipe: string;
+    DataType: string;
 }
 
 export interface IDataStructure {

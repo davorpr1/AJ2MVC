@@ -21,7 +21,8 @@ var paths = {
 
 var libs = [
     "scripts/jQuery.js",
-    "scripts/jQuery-ui.js",
+    "scripts/jQuery-ui.min.js",
+    "scripts/pqgrid.min.js",
     paths.npm + "angular2/bundles/angular2.js",
     paths.npm + "angular2/bundles/router.js",
     paths.npm + "angular2/bundles/http.js",

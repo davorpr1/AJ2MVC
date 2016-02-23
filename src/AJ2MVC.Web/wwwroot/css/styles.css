@@ -104,6 +104,9 @@ control-messages div {
     text-align: left;
     padding: 8px;
 }
+a.view_details {
+    cursor: pointer !important;
+}
 .baseTable a {
     cursor: pointer !important;
 }

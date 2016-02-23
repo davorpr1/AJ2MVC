@@ -7,6 +7,30 @@
 /// <reference path="../jquery/jquery.d.ts"/>
 
 declare module JQueryUI {
+    // PQ Grid ////////////////////////////////////////////////////
+
+    interface PQGridColumn {
+        title: string;
+        width?: number;
+        dataType: string;
+        align?: string;
+        render?: any;
+        hidden?: boolean;
+        dataIndx: string;
+    }
+
+    interface PQGridDataModel {
+        data: any[];
+        sortIndx?: string;
+        sortDir?: string;
+    }
+
+    interface PQGridOptions {
+        colModel: PQGridColumn[];
+        dataModel: PQGridDataModel;
+        refresh?: Function;
+    }
+
     // Accordion //////////////////////////////////////////////////
 
     interface AccordionOptions extends AccordionEvents {
@@ -1004,6 +1028,13 @@ declare module JQueryUI {
 }
 
 interface JQuery {
+    pqGrid(): JQuery;
+    pqGrid(options: JQueryUI.PQGridOptions): JQuery;
+    pqGrid(methodName: string, optionName: string, data: any): void;
+    pqGrid(methodName: string, optionName: string): Array<any>;
+    pqGrid(methodName: string): void;
+    pqGrid(methodName: 'destroy'): void;
+    pqGrid(methodName: 'getRowIndx', filter: any): any;
 
     accordion(): JQuery;
     accordion(methodName: 'destroy'): void;

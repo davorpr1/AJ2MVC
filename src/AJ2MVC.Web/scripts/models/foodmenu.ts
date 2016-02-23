@@ -23,7 +23,7 @@ export class FoodMenu extends BaseEntity {
     }
     public ActiveUntilDate: Date = null;
 
-    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "" }, { Name: "ActiveFrom", Pipe: "msDate" }]; }
+    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "", DataType: "string" }, { Name: "ActiveFrom", Pipe: "msDate", DataType: "date" }]; }
 
     getNewInstance(): FoodMenu { return new FoodMenu(); }
     getModuleName(): string { return "FoodOrder"; }

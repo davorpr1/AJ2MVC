@@ -6,7 +6,7 @@ import { TestLogger } from './../components/logger';
 import { Restaurant } from './../models/restaurant';
 import { IEntityDataService, IEntityContainer, IOverrideDetailComponent } from './../models/interfaces';
 import { OverrideableDetailComponent } from './../components/overrideable.component';
-
+import { GridComponent } from './../controls/grid.control';
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
 
 @Component({

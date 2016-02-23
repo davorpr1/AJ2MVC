@@ -24,6 +24,7 @@ import { IDataStructure, IEntityDataService, OverrideComponentDescriptor } from 
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
+import { RestaurantListEntityListOverrideComponent } from './../overrides/restaurant-list-entityList.component';
 
 declare var jQuery: JQueryStatic;
 
@@ -65,6 +66,7 @@ class App2Component implements AfterViewInit, IRouteMechanism {
 
         let x: any = RestaurantDetailNameLabelOverrideComponent; // just to trigger decorator code
         x = RestaurantDetailCustomWebsiteControlComponent; // just to trigger decorator code
+        x = RestaurantListEntityListOverrideComponent; // just to trigger decorator code
     }
 
     handleNavigation(link: string) {

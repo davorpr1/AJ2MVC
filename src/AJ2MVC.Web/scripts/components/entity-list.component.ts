@@ -31,7 +31,6 @@ export class WrapperPipe implements PipeTransform {
     providers: [ChangeDetectorRef],
     pipes: [WrapperPipe],
     template: `
-        <p>Entity list</p>
         <table class="baseTable">
             <tr>
                 <th *ngFor="#browseField of fields">{{browseField.Name}}</th>
