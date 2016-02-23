@@ -11,6 +11,7 @@ import { ComponentOverridesFactory } from './../factories/component-overrides.fa
 
 @Component({
     directives: [FORM_DIRECTIVES],
+    providers: [ComponentRef],
     selector: 'restaurant-detail',
     template: `<div #DEFAULTANCHOR></div>
             <h3>Restaurant details</h3>
@@ -53,11 +54,11 @@ export class RestaurantDetailComponent extends OverrideableDetailComponent imple
         public dynamicComponentLoader: DynamicComponentLoader,
         public injector: Injector,
         public elementRef: ElementRef,
-        private fb: FormBuilder)
+        private fb: FormBuilder,
+        private compRef: ComponentRef)
     {
         super(logger, dynamicComponentLoader, injector, elementRef);
         this.entityID = routeParams.get("id");
-
         this.entityService.data$.subscribe(updatedRestaurants => {
             this.entity.setModelData(updatedRestaurants.find(rest => rest.ID === this.entityID && rest instanceof Restaurant) as Restaurant);
             if (!this.entity) this.entity = new Restaurant();

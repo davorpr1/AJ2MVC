@@ -81,13 +81,15 @@ export class DecoratorRegistrations {
     static registeredOverrides: Storage<OverrideComponentDescriptor> = new Storage<OverrideComponentDescriptor>();
 }
 
-export class OverrideDetailComponentMetadata {
+export interface OverrideDetailComponentMetadata {
     hostComponent: any;
-    targetPlaceHolder: string;
+    targetPlaceHolder?: string;
 }
 
 export function OverrideDetailComponent(params: OverrideDetailComponentMetadata) {
     return (target: any) => {
+        if (!params.targetPlaceHolder) params.targetPlaceHolder = 'DEFAULTANCHOR';
+
         DecoratorRegistrations.registeredOverrides.data.push({ hostComponentDescriptor: params.hostComponent.name, hostElementPlaceHolder: params.targetPlaceHolder, overrideComponent: target });
         console.log(' ***** Override detail component registered: ' + target + ', args: ' + params.hostComponent + ' -> ' + params.targetPlaceHolder);
     }

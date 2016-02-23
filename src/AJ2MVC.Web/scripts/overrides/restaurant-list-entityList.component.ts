@@ -22,7 +22,7 @@ export class RestaurantListEntityListOverrideComponent implements IOverrideDetai
         @Inject(forwardRef(() => RestaurantListComponent)) parentComponent: RestaurantListComponent
     ) {
         this.dataEntity = parentComponent.dataEntity;
-        (parentComponent.elementRef.nativeElement as HTMLElement).querySelectorAll("base-grid").item(0).setAttribute('hidden', 'hidden');
+        (parentComponent.elementRef_ODC.nativeElement as HTMLElement).querySelectorAll("base-grid").item(0).setAttribute('hidden', 'hidden');
         logger.log("Restaurant list customization - List representation replaced!");
     }
     getInstanceID(): string { return "NotDefined"; }

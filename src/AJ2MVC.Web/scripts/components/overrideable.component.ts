@@ -26,11 +26,15 @@ export class OverrideableDetailComponent implements OnInit {
         var that = this;
         var factory: ComponentOverridesFactory = this.injector_ODC.get(ComponentOverridesFactory);
         factory.getAllComponentOverrides(this.getOverrideListeners()).map(desc => {
-            this.dynamicComponentLoader_ODC.loadIntoLocation(desc.overrideComponent, this.elementRef_ODC, desc.hostElementPlaceHolder).then(
-                (newComp: ComponentRef) => {
+            var componentCreate: (newComp: ComponentRef) => void = (newComp: ComponentRef) => {
                     that.logger_ODC.log("Custom component loaded: " + (newComp.instance as IOverrideDetailComponent).getInstanceID());
-                }
-            );
+            };
+            // check if in defined anchors of current component exists targeted placeholder
+            if ((this.elementRef_ODC as any).internalElement.componentView.appElements.filter((x: any) => x.proto.directiveVariableBindings.hasOwnProperty(desc.hostElementPlaceHolder)).length == 0) {
+                that.logger_ODC.log('*** * ** ** No Anchor ' + desc.hostElementPlaceHolder);
+            } else {
+                this.dynamicComponentLoader_ODC.loadIntoLocation(desc.overrideComponent, this.elementRef_ODC, desc.hostElementPlaceHolder).then(componentCreate);
+            }
         });
     }
 }

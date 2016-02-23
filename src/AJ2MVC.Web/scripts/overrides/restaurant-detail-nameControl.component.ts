@@ -10,8 +10,7 @@ import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/re
     template: ``
 })
 @OverrideDetailComponent({
-    hostComponent: RestaurantDetailCustomWebsiteControlComponent,
-    targetPlaceHolder: "DEFAULTANCHOR"
+    hostComponent: RestaurantDetailCustomWebsiteControlComponent
 })
 export class RestaurantDetailNameLabelOverrideComponent implements IOverrideDetailComponent {
     constructor(private logger: TestLogger,
