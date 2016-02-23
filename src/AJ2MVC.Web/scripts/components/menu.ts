@@ -1,9 +1,10 @@
 ﻿import { Provider, View, provide, Injector, Component, Injectable, OpaqueToken, OnInit, EventEmitter } from 'angular2/core';
+import { Router } from 'angular2/router';
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { bootstrap } from 'angular2/platform/browser';
 import { TOOLTIP_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 import { TestLogger } from './../components/logger';
-import { IDataStructure, IEntityDataService } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, DecoratorRegistrations } from './../models/interfaces';
 
 export class Storage<T> {
     public data: Array<T> = new Array<T>();
@@ -40,18 +41,32 @@ export interface IRouteMechanism {
     handleNavigation(link: string): void;
 }
 
+export interface IMenuItem {
+    Name: string;
+    Icon?: string;
+    Tooltip: string;
+    Link: string;
+}
+
 export class MenuItem {
-    public Name: string;
-    public Icon: string;
-    public Tooltip: string;
-    public Link: string;
-    public RouteMechanism: IRouteMechanism;
+    public Name: string = "";
+    public Icon: string = "";
+    public Tooltip: string = "";
+    public Link: string = "";
+    constructor(menuItem?: IMenuItem) {
+        if (menuItem) {
+            this.Name = menuItem.Name;
+            this.Icon = menuItem.Icon;
+            this.Tooltip = menuItem.Tooltip;
+            this.Link = menuItem.Link;
+        }
+    }
 }
 
 @Component({
     directives: [FORM_DIRECTIVES, TOOLTIP_DIRECTIVES],
-    selector: 'global-menu',
-    template: `
+    selector: 'app-menu',
+    template: `Menu
         <nav><a *ngFor="#menuItem of _plainMenu" 
            tooltip="{{menuItem.Tooltip}}"
            tooltipPlacement="top"
@@ -59,33 +74,27 @@ export class MenuItem {
            (click)="gotoMenuDirection(menuItem)">{{menuItem.Name}}</a>
         </nav>`
 })
-class MenuComponent implements OnInit {
+export class MenuComponent  {
     private menuItems: Storage<MenuItem> = new Storage<MenuItem>();
     private _plainMenu: Array<MenuItem> = new Array<MenuItem>();
 
-    constructor(private globalDataShare: GlobalDataSharing, private logger: TestLogger) {
-    }
-
-    gotoMenuDirection(menuItem: MenuItem) {
-        menuItem.RouteMechanism.handleNavigation(menuItem.Link);
-    }
-
-    ngOnInit() {
+    constructor(private globalDataShare: GlobalDataSharing, private logger: TestLogger, private router: Router) {
+        logger.log('MenuComponent instatinated!');
         this.menuItems = this.globalDataShare.getSharedData<MenuItem>("MenuItems");
+        DecoratorRegistrations.registeredDecorators.filter(x => x instanceof MenuItem).map(exDecorated => this.menuItems.data.push(exDecorated));
+
         this._plainMenu = this.menuItems.data;
 
         this.menuItems.OnUpdate.subscribe((newItem: MenuItem) => {
-            this.logger.log("New menu item registered: " + newItem.Name);
+            console.log("New menu item registered: " + newItem);
             this._plainMenu = this.menuItems.data;
         }, () => { }, () => { });
     }
+
+    gotoMenuDirection(menuItem: MenuItem) {
+        this.router.navigate([menuItem.Link]);
+    }    
 }
-
-bootstrap(MenuComponent, [
-    new Provider(TestLogger, { useClass: TestLogger }),
-    new Provider(GlobalDataSharing, { useClass: GlobalDataSharing })
-]);
-
 
 // 1. Menu items container
     // simple class with Array<menuItem>

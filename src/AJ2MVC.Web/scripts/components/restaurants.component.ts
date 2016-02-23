@@ -3,6 +3,7 @@ import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
 import { TestLogger } from './../components/logger';
 import { RestaurantListComponent } from './../components/restaurant-list.component';
 import { RestaurantWrapperComponent } from './../components/restaurant-wrapper.component';
+import { AppMenuItem } from './../models/interfaces';
 
 @Component({
     directives: [ROUTER_DIRECTIVES],
@@ -17,6 +18,11 @@ import { RestaurantWrapperComponent } from './../components/restaurant-wrapper.c
     { path: 'list/', name: 'RestaurantList', component: RestaurantListComponent, useAsDefault: true },
     { path: 'detail/:id', name: 'FoodOrder_Restaurant_DetailComponent', component: RestaurantWrapperComponent }
 ])
+@AppMenuItem({
+    Name: "Restaurants",
+    Link: "./RestaurantCenter/RestaurantList",
+    Tooltip: "List of restaurants"
+})
 export class RestaurantsComponent {
 
     navigateToList() {

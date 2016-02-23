@@ -29,6 +29,7 @@ declare module JQueryUI {
         colModel: PQGridColumn[];
         dataModel: PQGridDataModel;
         refresh?: Function;
+        toolbar?: any;
     }
 
     // Accordion //////////////////////////////////////////////////

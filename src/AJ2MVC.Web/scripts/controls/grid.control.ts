@@ -54,6 +54,19 @@ export class GridComponent implements AfterViewInit {
             this.gridContainer.pqGrid({
                 colModel: this.gridColumns,
                 dataModel: { data: this.showEntityList },
+                toolbar: {
+                    items: [
+                        {
+                            type: 'button', icon: 'ui-icon-plus', label: 'New', listeners: [
+                                {
+                                    "click": function (evt: any, ui: any) {
+                                        that.openDetail(that.showEntity.getNewInstance());
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
                 refresh: function () {
                     var grid = jQuery(this);
                     if (!grid) return;

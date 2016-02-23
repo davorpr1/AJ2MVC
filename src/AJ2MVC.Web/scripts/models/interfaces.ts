@@ -1,7 +1,7 @@
 ﻿import { Injectable } from 'angular2/core';
 import { Validator } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
-import { Storage } from './../components/menu';
+import { Storage, MenuItem, IMenuItem } from './../components/menu';
 
 export interface IEmptyConstruct {
     new (): any;
@@ -65,6 +65,11 @@ export class OverrideComponentDescriptor {
     hostComponentDescriptor: string;
     hostElementPlaceHolder: string;
     overrideComponent: any;
+    constructor(item: OverrideComponentDescriptor) {
+        this.hostComponentDescriptor = item.hostComponentDescriptor;
+        this.hostElementPlaceHolder = item.hostElementPlaceHolder;
+        this.overrideComponent = item.overrideComponent;
+    }
 }
 
 @Injectable()
@@ -78,7 +83,7 @@ export class IEntityContainer {
 }
 
 export class DecoratorRegistrations {
-    static registeredOverrides: Storage<OverrideComponentDescriptor> = new Storage<OverrideComponentDescriptor>();
+    static registeredDecorators: Array<any> = new Array<any>();
 }
 
 export interface OverrideDetailComponentMetadata {
@@ -90,7 +95,14 @@ export function OverrideDetailComponent(params: OverrideDetailComponentMetadata)
     return (target: any) => {
         if (!params.targetPlaceHolder) params.targetPlaceHolder = 'DEFAULTANCHOR';
 
-        DecoratorRegistrations.registeredOverrides.data.push({ hostComponentDescriptor: params.hostComponent.name, hostElementPlaceHolder: params.targetPlaceHolder, overrideComponent: target });
-        console.log(' ***** Override detail component registered: ' + target + ', args: ' + params.hostComponent + ' -> ' + params.targetPlaceHolder);
+        DecoratorRegistrations.registeredDecorators.push(new OverrideComponentDescriptor({ hostComponentDescriptor: params.hostComponent.name, hostElementPlaceHolder: params.targetPlaceHolder, overrideComponent: target }));
+        console.log(' ***** Override detail component registered: ' + target + ', args: ' + params.hostComponent.name + ' -> ' + params.targetPlaceHolder);
+    }
+}
+
+export function AppMenuItem(params: IMenuItem) {
+    return (target: any) => {
+        DecoratorRegistrations.registeredDecorators.push(new MenuItem(params));
+        console.log(' ***** Menu item registered in declaration time: ' + target + ', args: ' + params);
     }
 }

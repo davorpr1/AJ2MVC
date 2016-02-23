@@ -119,10 +119,7 @@ class AppComponent implements AfterViewInit {
     testvar: ModelA = new ModelA();
 
     constructor(private m_elementRef: ElementRef, logger: TestLogger, modelFactory: ModelAFactory, http: Http, fb: FormBuilder, gds: GlobalDataSharing) {
-        let newMenuItem: MenuItem = new MenuItem();
-        newMenuItem.Name = "Test";
-        newMenuItem.Tooltip = "Some kind of extra data in tooltip";
-        gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
+        gds.addSharedData<MenuItem>("MenuItems", new MenuItem({ Name: "Test", Tooltip: "Some kind of extra data in tooltip", Link: "" }));
 
         this.testvar.initialize();
         this.http = http;
@@ -141,9 +138,7 @@ class AppComponent implements AfterViewInit {
 
             this.dynamicProgress = Math.random() * this.maxProgress;
 
-            newMenuItem = new MenuItem();
-            newMenuItem.Name = "Test " + this.dynamicProgress.toString();
-            gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
+            gds.addSharedData<MenuItem>("MenuItems", new MenuItem({ Name: "Test " + this.dynamicProgress.toString(), Tooltip: "Other tooltip", Link: "" }));
 
         }, 3000);		
     }

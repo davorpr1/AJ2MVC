@@ -51,10 +51,7 @@ class ModuleStartComponent {
     static moduleIdentifier: string = "Module X - Overrides of basic classes";
 
     constructor(logger: TestLogger, globalInjector: GlobalOverridesInjector, globalDataShare: GlobalDataSharing) {
-        let newMenuItem: MenuItem = new MenuItem();
-        newMenuItem.Name = "Test";
-        newMenuItem.Tooltip = "Some kind of extra data in tooltip";
-        globalDataShare.addSharedData<MenuItem>("MenuItems", newMenuItem);
+        globalDataShare.addSharedData<MenuItem>("MenuItems", new MenuItem({ Name: "Test", Tooltip: "Some tooltip value", Link: "" }));
 
         logger.log("Module X instatinated!");
 

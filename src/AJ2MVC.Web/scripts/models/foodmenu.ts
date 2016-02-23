@@ -15,15 +15,21 @@ export class FoodMenu extends BaseEntity {
     public ID: string;    
 
     private _activeFromDate: Date;
+    private _activeUntilDate: Date;
     public get ActiveFromDate(): Date { return this._activeFromDate; }
     public set ActiveFromDate(value: Date) {
         this._activeFromDate = value;
         if (formatMSDate(this._activeFromDate) != this.ActiveFrom)
             this.ActiveFrom = formatMSDate(this._activeFromDate);
     }
-    public ActiveUntilDate: Date = null;
+    public get ActiveUntilDate(): Date { return this._activeUntilDate; }
+    public set ActiveUntilDate(value: Date) {
+        this._activeUntilDate = value;
+        if (formatMSDate(this._activeUntilDate) != this.ActiveUntil)
+            this.ActiveUntil = formatMSDate(this._activeUntilDate);
+    }
 
-    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "", DataType: "string" }, { Name: "ActiveFrom", Pipe: "msDate", DataType: "date" }]; }
+    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "", DataType: "string" }, { Name: "ActiveFromDate", Pipe: "msDate", DataType: "date" }, { Name: "ActiveUntilDate", Pipe: "msDate", DataType: "date" }]; }
 
     getNewInstance(): FoodMenu { return new FoodMenu(); }
     getModuleName(): string { return "FoodOrder"; }

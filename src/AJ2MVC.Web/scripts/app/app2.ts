@@ -25,13 +25,16 @@ import { ComponentOverridesFactory } from './../factories/component-overrides.fa
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
 import { RestaurantListEntityListOverrideComponent } from './../overrides/restaurant-list-entityList.component';
+import { MenuComponent } from './../components/menu'
 
 declare var jQuery: JQueryStatic;
 
 @Component({
     selector: "admin-space",
-    directives: [ROUTER_DIRECTIVES],
-    template: `<h1>Food ordering Administration</h1>
+    directives: [ROUTER_DIRECTIVES, MenuComponent],
+    template: `
+        <app-menu></app-menu>
+        <h1>Food ordering Administration</h1>
         <div class="col-xs-9" style="border:1px;">
             <router-outlet></router-outlet>
         </div>
@@ -41,39 +44,33 @@ declare var jQuery: JQueryStatic;
     { path: '/center/...', name: 'RestaurantCenter', component: RestaurantsComponent, useAsDefault: true },
     { path: '/menus/...', name: 'FoodMenuCenter', component: FoodMenusComponent }
 ])
-class App2Component implements AfterViewInit, IRouteMechanism {
+class App2Component implements AfterViewInit {
 
     constructor(private m_elementRef: ElementRef,
-        logger: TestLogger,
+        private logger: TestLogger,
         private http: Http,
         gds: GlobalDataSharing,
-        private router: Router,
         private permissionService: PermissionProvider
     ) {
-        let newMenuItem: MenuItem = new MenuItem();
+        /*let newMenuItem: MenuItem = new MenuItem();
         newMenuItem.Name = "Restaurants";
         newMenuItem.Link = "RestaurantCenter";
-        newMenuItem.RouteMechanism = this;
         newMenuItem.Tooltip = "Some kind of extra data in tooltip";
         gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
 
         newMenuItem = new MenuItem();
         newMenuItem.Name = "Food menus";
         newMenuItem.Link = "FoodMenuCenter";
-        newMenuItem.RouteMechanism = this;
         newMenuItem.Tooltip = "Basic table to show all the food menus";
         gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
-
+        */
         let x: any = RestaurantDetailNameLabelOverrideComponent; // just to trigger decorator code
         x = RestaurantDetailCustomWebsiteControlComponent; // just to trigger decorator code
         x = RestaurantListEntityListOverrideComponent; // just to trigger decorator code
     }
 
-    handleNavigation(link: string) {
-        this.router.navigate([link]);
-    }
-
     ngAfterViewInit() {
+        this.logger.log("Application initialized!");
     }
     
 }
@@ -91,7 +88,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 bootstrap(App2Component, [
     RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory,
 
-    provide(IEntityDataService, { useClass: RhetosRestService }),
+    provide(IEntityDataService, { useClass: LocalStorageService }),
 
     provide(TestLogger, { useClass: TestLogger }),
     provide(GlobalDataSharing, { useClass: GlobalDataSharing }),
