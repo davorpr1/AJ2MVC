@@ -8,14 +8,14 @@ import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod,
 import { ROUTER_PROVIDERS } from 'angular2/router';
 import {bootstrap} from 'angular2/platform/browser';
 import { ModelA } from './../models/modela';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { ModelAsHTMLPipe, ExponentialStrengthPipe } from './../pipes/ModelASHTMLPipe';
 import { ModelASuperComponent } from './../components/modela.component';
 import { SuperTextboxComponent } from './../controls/super-textbox.control';
 import { GlobalOverridesInjector } from './../module/module.registration';
 import { DatePickerComponent } from './../controls/datepicker.control';
 import { Alert, Progressbar, DROPDOWN_DIRECTIVES, TYPEAHEAD_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
-import { GlobalDataSharing, MenuItem } from './../components/menu';
+import { GlobalDataSharing, MenuItem } from './../controls/menu';
 
 import {ModelAFactory} from './../factories/component.factory';
 

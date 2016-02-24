@@ -1,8 +1,8 @@
 ﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Inject, forwardRef } from 'angular2/core';
 import { FORM_DIRECTIVES } from 'angular2/common';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent } from './../models/interfaces';
-import { RestaurantDetailComponent } from './../components/restaurant-detail.component';
+import { RestaurantDetailComponent } from './../components/restaurant/restaurant-detail.component';
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 
 @Component({

@@ -1,12 +1,12 @@
 ﻿import { Component, ApplicationRef, ChangeDetectorRef, ChangeDetectionStrategy } from 'angular2/core';
 import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl } from 'angular2/common';
 import { RouteParams, Router } from 'angular2/router';
-import { TestLogger } from './../components/logger';
-import { FoodMenu } from './../models/foodmenu';
-import { Restaurant } from './../models/restaurant';
-import { DatePickerComponent } from './../controls/datepicker.control';
-import { AutocompleteComponent } from './../controls/autocomplete.control';
-import { IEntityDataService, IEmptyConstruct } from './../models/interfaces';
+import { TestLogger } from './../../services/logger';
+import { FoodMenu } from './../../models/foodmenu';
+import { Restaurant } from './../../models/restaurant';
+import { DatePickerComponent } from './../../controls/datepicker.control';
+import { AutocompleteComponent } from './../../controls/autocomplete.control';
+import { IEntityDataService, IEmptyConstruct } from './../../models/interfaces';
 
 @Component({
     directives: [FORM_DIRECTIVES, AutocompleteComponent, DatePickerComponent],

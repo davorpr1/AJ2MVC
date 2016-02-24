@@ -1,5 +1,5 @@
 ﻿import {Provider, provide, Injector, OpaqueToken, Injectable, NoProviderError, OnInit } from 'angular2/core';
-import { GlobalDataSharing, Storage } from './../components/menu';
+import { GlobalDataSharing, Storage } from './../controls/menu';
 import { OverrideComponentDescriptor, IOverrideDetailComponent, IEmptyConstruct, DecoratorRegistrations } from './../models/interfaces';
 
 @Injectable()

@@ -2,7 +2,7 @@
 
 import { Pipe, PipeTransform } from 'angular2/core';
 import { ModelA } from './../models/modela';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 
 import * as momment_ from 'moment';
 const moment: moment.MomentStatic = (<any>momment_)["default"] || momment_;

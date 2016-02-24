@@ -1,7 +1,7 @@
 ﻿import { Injectable } from 'angular2/core';
 import { Validator } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
-import { Storage, MenuItem, IMenuItem } from './../components/menu';
+import { Storage, MenuItem, IMenuItem } from './../controls/menu';
 
 export interface IEmptyConstruct {
     new (): any;

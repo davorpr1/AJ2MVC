@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Injectable, Injector, Provider } from 'angular2/core';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { IOverrideDetailComponent } from './../models/interfaces';
 
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';

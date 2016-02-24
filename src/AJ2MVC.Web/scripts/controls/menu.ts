@@ -3,7 +3,7 @@ import { Router } from 'angular2/router';
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { bootstrap } from 'angular2/platform/browser';
 import { TOOLTIP_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { IDataStructure, IEntityDataService, DecoratorRegistrations } from './../models/interfaces';
 
 export class Storage<T> {

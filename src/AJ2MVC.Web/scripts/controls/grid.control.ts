@@ -10,6 +10,12 @@ import { BaseEntity } from './../models/entitybase';
     template: `<div id="gridContainer"></div>`
 })
 export class GridComponent implements AfterViewInit {
+    @Input() set entityType(EntityType: IEmptyConstruct) {
+        this.showEntity = new EntityType();
+        this.EntityDataStructure = EntityType;
+        this.registerDataService();
+    }
+
     private _controlID: number;
     private static staticID: number = 1;
     private showEntityList: Array<IDataStructure> = new Array<IDataStructure>();
@@ -23,12 +29,6 @@ export class GridComponent implements AfterViewInit {
         private entityService: IEntityDataService
     ) {
         this._controlID = ++GridComponent.staticID;
-    }
-
-    @Input() set entityType(EntityType: IEmptyConstruct) {
-        this.showEntity = new EntityType();
-        this.EntityDataStructure = EntityType;
-        this.registerDataService();
     }
 
     openDetail(item: IDataStructure) {
@@ -86,7 +86,12 @@ export class GridComponent implements AfterViewInit {
                 this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
                 this.gridContainer.pqGrid('refreshDataAndView');
             });
-            this.entityService.initdataLoad(this.EntityDataStructure);
+            try {
+                this.entityService.initdataLoad(this.EntityDataStructure);
+            } catch (e) {
+                alert(e);
+            }
+
             this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
             this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
             this.gridContainer.pqGrid('refreshDataAndView');

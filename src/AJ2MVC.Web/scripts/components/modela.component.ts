@@ -1,5 +1,5 @@
 ﻿import { Component, View, provide } from 'angular2/core';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { ModelA } from './../models/modela';
 import { SuperTextboxComponent } from './../controls/super-textbox.control';
 

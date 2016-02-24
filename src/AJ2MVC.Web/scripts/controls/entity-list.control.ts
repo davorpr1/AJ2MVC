@@ -2,9 +2,9 @@
 import { DatePipe } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
-import { TestLogger } from './../components/logger';
+import { TestLogger } from './../services/logger';
 import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldDefinition } from './../models/interfaces';
-import { GlobalDataSharing, MenuItem } from './../components/menu';
+import { GlobalDataSharing, MenuItem } from './../controls/menu';
 import { MSDatePipe } from './../pipes/ModelASHTMLPipe';
 import { BaseEntity } from './../models/entitybase';
 
@@ -45,7 +45,14 @@ export class WrapperPipe implements PipeTransform {
         <button type="button" class="info" (click)="newEntity()">New {{ showEntity.getEntityName() }}</button>
         `
 })
-export class EntityListComponent implements OnInit, AfterViewInit {
+export class EntityListControl implements OnInit, AfterViewInit {
+    @Input() set entityType(EntityType: IEmptyConstruct) {
+        this.showEntity = new EntityType();
+        this.EntityDataStructure = EntityType;
+        this.fields = [].concat(this.showEntity.browseFields);
+        this.registerDataService();
+    }
+
     private showEntityList: Array<IDataStructure> = new Array<IDataStructure>();
     private showEntity: IDataStructure = new BaseEntity();
     private EntityDataStructure: IEmptyConstruct = BaseEntity;
@@ -74,25 +81,26 @@ export class EntityListComponent implements OnInit, AfterViewInit {
         logger.log("Entity list component initiated!");
     }
 
-    @Input() set entityType(EntityType: IEmptyConstruct) {
-        this.showEntity = new EntityType();
-        this.EntityDataStructure = EntityType;
-        this.fields = [].concat(this.showEntity.browseFields);
-        this.registerDataService();
-    }
-
     private registerDataService() {
         if (this.showEntity) {
             this.entityService.data$.subscribe((updatedEntities: Array<any>) => {
                 this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
             });
-            this.entityService.initdataLoad(this.EntityDataStructure);
+            try {
+                this.entityService.initdataLoad(this.EntityDataStructure);
+            } catch (e) {
+                alert(e);
+            }
             this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
         }
     }
 
     triggerRefreshData() {
-        this.entityService.reloadData(this.EntityDataStructure);
+        try {
+            this.entityService.reloadData(this.EntityDataStructure);
+        } catch (e) {
+            alert(e);
+        }
     }
 
     newEntity() {

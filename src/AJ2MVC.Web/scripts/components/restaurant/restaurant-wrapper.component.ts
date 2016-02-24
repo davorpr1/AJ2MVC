@@ -2,11 +2,11 @@
 import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
-import { TestLogger } from './../components/logger';
-import { Restaurant } from './../models/restaurant';
-import { IEntityDataService, IEntityContainer } from './../models/interfaces';
+import { TestLogger } from './../../services/logger';
+import { Restaurant } from './../../models/restaurant';
+import { IEntityDataService, IEntityContainer } from './../../models/interfaces';
 
-import { RestaurantDetailComponent } from './../components/restaurant-detail.component';
+import { RestaurantDetailComponent } from './../../components/restaurant/restaurant-detail.component';
 
 @Component({
     directives: [RestaurantDetailComponent],

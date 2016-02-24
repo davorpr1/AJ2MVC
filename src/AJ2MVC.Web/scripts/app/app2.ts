@@ -6,16 +6,14 @@ import {FORM_PROVIDERS, NgModel} from 'angular2/common';
 import { RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS, Router, HashLocationStrategy, LocationStrategy } from 'angular2/router';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import {bootstrap} from 'angular2/platform/browser';
-import { TestLogger } from './../components/logger';
-import { GlobalDataSharing, MenuItem, IRouteMechanism } from './../components/menu';
+import { TestLogger } from './../services/logger';
+import { GlobalDataSharing, MenuItem, IRouteMechanism } from './../controls/menu';
 
-import { RestaurantsComponent } from './../components/restaurants.component';
-import { FoodMenusComponent } from './../components/foodmenus.component';
-// import { RestaurantsService } from './../services/restaurants.service';
+import { RestaurantsComponent } from './../components/restaurant/restaurants.component';
+import { FoodMenusComponent } from './../components/foodmenu/foodmenus.component';
 import { LocalStorageService } from './../services/local-storage.service';
 import { RhetosRestService } from './../services/rhetos-rest.service';
 
-// import { FoodMenuService } from './../services/foodmenu.service';
 import { PermissionProvider } from './../services/permission-provider.service';
 
 import { FoodMenu } from './../models/foodmenu';
@@ -24,8 +22,8 @@ import { IDataStructure, IEntityDataService, OverrideComponentDescriptor } from 
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
-import { RestaurantListEntityListOverrideComponent } from './../overrides/restaurant-list-entityList.component';
-import { MenuComponent } from './../components/menu'
+import { FoodMenuListEntityListOverrideComponent } from './../overrides/foodmenu-list-entityList.component';
+import { MenuComponent } from './../controls/menu'
 
 declare var jQuery: JQueryStatic;
 
@@ -49,24 +47,11 @@ class App2Component implements AfterViewInit {
     constructor(private m_elementRef: ElementRef,
         private logger: TestLogger,
         private http: Http,
-        gds: GlobalDataSharing,
         private permissionService: PermissionProvider
     ) {
-        /*let newMenuItem: MenuItem = new MenuItem();
-        newMenuItem.Name = "Restaurants";
-        newMenuItem.Link = "RestaurantCenter";
-        newMenuItem.Tooltip = "Some kind of extra data in tooltip";
-        gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
-
-        newMenuItem = new MenuItem();
-        newMenuItem.Name = "Food menus";
-        newMenuItem.Link = "FoodMenuCenter";
-        newMenuItem.Tooltip = "Basic table to show all the food menus";
-        gds.addSharedData<MenuItem>("MenuItems", newMenuItem);
-        */
         let x: any = RestaurantDetailNameLabelOverrideComponent; // just to trigger decorator code
         x = RestaurantDetailCustomWebsiteControlComponent; // just to trigger decorator code
-        x = RestaurantListEntityListOverrideComponent; // just to trigger decorator code
+        x = FoodMenuListEntityListOverrideComponent; // just to trigger decorator code
     }
 
     ngAfterViewInit() {
@@ -88,7 +73,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 bootstrap(App2Component, [
     RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory,
 
-    provide(IEntityDataService, { useClass: LocalStorageService }),
+    provide(IEntityDataService, { useClass: RhetosRestService }),
 
     provide(TestLogger, { useClass: TestLogger }),
     provide(GlobalDataSharing, { useClass: GlobalDataSharing }),

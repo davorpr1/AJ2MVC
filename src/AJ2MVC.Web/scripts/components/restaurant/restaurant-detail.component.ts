@@ -2,12 +2,12 @@
 import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
-import { TestLogger } from './../components/logger';
-import { Restaurant } from './../models/restaurant';
-import { IEntityDataService, IEntityContainer, IOverrideDetailComponent } from './../models/interfaces';
-import { OverrideableDetailComponent } from './../components/overrideable.component';
-import { GridComponent } from './../controls/grid.control';
-import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
+import { TestLogger } from './../../services/logger';
+import { Restaurant } from './../../models/restaurant';
+import { IEntityDataService, IEntityContainer, IOverrideDetailComponent } from './../../models/interfaces';
+import { OverrideableDetailComponent } from './../../components/overrideable.component';
+import { GridComponent } from './../../controls/grid.control';
+import { ComponentOverridesFactory } from './../../factories/component-overrides.factory';
 
 @Component({
     directives: [FORM_DIRECTIVES],

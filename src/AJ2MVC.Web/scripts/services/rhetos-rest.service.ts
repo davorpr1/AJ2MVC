@@ -24,6 +24,7 @@ export class DataStructureWithClaims {
     NewRight: boolean = false;
     EditRight: boolean = false;
     RemoveRight: boolean = false;
+    PermissionLoaded: boolean = false;
 
     InitialDataLoaded: boolean = false;
 }
@@ -86,6 +87,7 @@ export class RhetosRestService implements IEntityDataService {
                             that.reloadData(dum.DataStructureType);
                         }
                     }
+                    dum.PermissionLoaded = true;
             });
         });
     } 
@@ -149,7 +151,8 @@ export class RhetosRestService implements IEntityDataService {
     }
 
     reloadData(DataStructure: IEmptyConstruct) {
-        if (this.getDummyWithClaim(DataStructure).ReadRight) {
+        var perm: DataStructureWithClaims = this.getDummyWithClaim(DataStructure);
+        if (perm.ReadRight) {
             this._http.get(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/')
                 .subscribe(data => {
                     let toAdd: Array<IDataStructure> = new Array<IDataStructure>();
@@ -168,12 +171,19 @@ export class RhetosRestService implements IEntityDataService {
                     this._dataStore.data = this._dataStore.data.concat(toAdd);
                     if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
                 }, error => console.log('Could not load data.'));
+        } else {
+            if (perm.PermissionLoaded) {
+                throw new Error('User does not have right to load: ' + this.getEntityNameID(DataStructure));
+            }
         }
     }
 
     createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
-        if (!this.getDummyWithClaim(DataStructure).NewRight) {
-            console.log('User does not have "New" right on "' + this.getModuleName(DataStructure) + '.' + this.getEntityName(DataStructure) + '".');
+        var perm: DataStructureWithClaims = this.getDummyWithClaim(DataStructure);
+        if (!perm.NewRight) {
+            if (perm.PermissionLoaded) {
+                console.log('User does not have "New" right on "' + this.getModuleName(DataStructure) + '.' + this.getEntityName(DataStructure) + '".');
+            }
         } else {
             let headers = new Headers({ 'Content-Type': 'application/json' });
             let options = new RequestOptions({ headers: headers });

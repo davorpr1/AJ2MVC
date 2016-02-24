@@ -1,9 +1,9 @@
 ﻿import { Component, View, provide } from 'angular2/core';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
-import { TestLogger } from './../components/logger';
-import { RestaurantListComponent } from './../components/restaurant-list.component';
-import { RestaurantWrapperComponent } from './../components/restaurant-wrapper.component';
-import { AppMenuItem } from './../models/interfaces';
+import { TestLogger } from './../../services/logger';
+import { RestaurantListComponent } from './../../components/restaurant/restaurant-list.component';
+import { RestaurantWrapperComponent } from './../../components/restaurant/restaurant-wrapper.component';
+import { AppMenuItem } from './../../models/interfaces';
 
 @Component({
     directives: [ROUTER_DIRECTIVES],

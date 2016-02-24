@@ -2,8 +2,8 @@
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { bootstrap } from 'angular2/platform/browser';
 import * as modDef from './../module/overrides';
-import { TestLogger } from './../components/logger';
-import { GlobalDataSharing, Storage, MenuItem } from './../components/menu';
+import { TestLogger } from './../services/logger';
+import { GlobalDataSharing, Storage, MenuItem } from './../controls/menu';
 
 @Injectable()
 export class GlobalOverridesInjector {
