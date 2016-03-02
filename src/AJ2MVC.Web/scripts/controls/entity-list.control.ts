@@ -3,7 +3,7 @@ import { DatePipe } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
 import { TestLogger } from './../services/logger';
-import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldDefinition } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldDefinition, FieldFilter } from './../models/interfaces';
 import { GlobalDataSharing, MenuItem } from './../controls/menu';
 import { MSDatePipe } from './../pipes/ModelASHTMLPipe';
 import { BaseEntity } from './../models/entitybase';
@@ -52,6 +52,16 @@ export class EntityListControl implements OnInit, AfterViewInit {
         this.fields = [].concat(this.showEntity.browseFields);
         this.registerDataService();
     }
+    @Input() editLink: string = "";
+
+    @Input() set filters(newFilters: Array<FieldFilter>) {
+        this._filters = newFilters;
+        var that = this;
+        if (this._filters && this._filters.length > 0 && this.showEntity) {
+            this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => { that.showEntityList = res; });
+        }
+    }
+    private _filters: Array<FieldFilter> = null;
 
     private showEntityList: Array<IDataStructure> = new Array<IDataStructure>();
     private showEntity: IDataStructure = new BaseEntity();
@@ -68,7 +78,6 @@ export class EntityListControl implements OnInit, AfterViewInit {
         private zone: NgZone,
         private applicationRef: ApplicationRef)
     {
-        this.registerDataService();
         var that = this;
         
         setInterval(() => {
@@ -83,15 +92,24 @@ export class EntityListControl implements OnInit, AfterViewInit {
 
     private registerDataService() {
         if (this.showEntity) {
-            this.entityService.data$.subscribe((updatedEntities: Array<any>) => {
-                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+            var that = this;
+            this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
+                if (!this._filters || this._filters.length === 0) {
+                    this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
+                } else {
+                    this.showEntityList = this.entityService.getCurrentLibraryWithFilters(this.EntityDataStructure, this._filters);
+                }
             });
             try {
                 this.entityService.initdataLoad(this.EntityDataStructure);
             } catch (e) {
                 alert(e);
             }
-            this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
+            if (this._filters && this._filters.length > 0) {
+                this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => { that.showEntityList = res; });
+            } else {
+                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+            }
         }
     }
 
@@ -108,7 +126,11 @@ export class EntityListControl implements OnInit, AfterViewInit {
     }
 
     openDetail(entity: IDataStructure) {
-        this.router.navigate([this.showEntity.getNameID() + '_DetailComponent', { id: entity.ID }]);
+        if (this.editLink.length > 0) {
+            this.router.navigate([this.editLink, { id: entity.ID }]);
+        } else {
+            this.router.navigate([this.showEntity.getNameID() + '_DetailComponent', { id: entity.ID }]);
+        }
     }
 
     ngAfterViewInit() {

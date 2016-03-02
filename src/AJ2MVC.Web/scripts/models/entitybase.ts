@@ -2,12 +2,12 @@
 
 import { EventEmitter } from 'angular2/core';
 import { Validators, Validator } from 'angular2/common';
-import { IDataStructure, FieldDefinition } from './../models/interfaces';
+import { IDataStructure, FieldDefinition, ValidatorDefinition } from './../models/interfaces';
 
 export class BaseEntity implements IDataStructure {
     public ID: string;
     
-    getValidators(): { [propName: string]: Function[]; } {
+    getValidators(): { [propName: string]: ValidatorDefinition[]; } {
         return {
         };
     }

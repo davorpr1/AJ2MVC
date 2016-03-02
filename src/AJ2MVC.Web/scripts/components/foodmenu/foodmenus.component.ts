@@ -18,11 +18,6 @@ import { AppMenuItem } from './../../models/interfaces';
         { path: 'list/', name: 'FoodMenuList', component: FoodMenuListComponent, useAsDefault: true },
         { path: 'detail/:id', name: 'FoodOrder_FoodMenu_DetailComponent', component: FoodMenuDetailComponent }
 ])
-@AppMenuItem({
-    Name: "Food menus",
-    Link: "./FoodMenuCenter/FoodMenuList",
-    Tooltip: "Food menu list"
-})
 export class FoodMenusComponent {
 
     navigateToList() {

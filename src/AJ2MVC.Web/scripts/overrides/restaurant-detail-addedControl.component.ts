@@ -5,40 +5,37 @@ import { Restaurant } from './../models/restaurant';
 import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent } from './../models/interfaces';
 import { RestaurantDetailComponent } from './../components/restaurant/restaurant-detail.component';
 import { OverrideableDetailComponent } from './../components/overrideable.component';
+import { TextboxComponent } from './../controls/textbox.control';
 
 @Component({
     directives: [FORM_DIRECTIVES],
-    template: `<div [ngFormModel]="customizedForm">
-                <div class="form-group">
-                <div #DEFAULTANCHOR></div>
-                <label for="WebSite">Web site</label>
-                <input ngControl="WebSite" type="text" [(ngModel)]="parent.entity.WebSite">
-                <div *ngIf="customizedForm.controls['WebSite'].hasError('required') && !customizedForm.controls['WebSite'].pristine" class="ui error message">Web site is required</div>
-                <div *ngIf="customizedForm.controls['WebSite'].hasError('notValidURL') && !customizedForm.controls['WebSite'].pristine" class="ui error message">Web site in not valid URL</div>
-              </div></div>`
+    template: ` <div #websiteControl></div>`
 })
 @OverrideDetailComponent({
     hostComponent: RestaurantDetailComponent,
     targetPlaceHolder: "formStart"
 })
-export class RestaurantDetailCustomWebsiteControlComponent extends OverrideableDetailComponent implements IOverrideDetailComponent {
+export class RestaurantDetailCustomWebsiteControlComponent extends OverrideableDetailComponent implements IOverrideDetailComponent, OnInit {
     public customStaticRefID: string = "RestaurantCustomizationComponent_";
     public static ID: number = 0;
-    public parent: IEntityContainer = { entity: new Restaurant() };
-    public customizedForm: ControlGroup;
 
     getInstanceID(): string { return this.customStaticRefID; }
 
     constructor(private logger: TestLogger,
         private elementRef: ElementRef,
-        private fb: FormBuilder,
-        @Inject(forwardRef(() => RestaurantDetailComponent)) parentComponent: RestaurantDetailComponent
+        @Inject(forwardRef(() => RestaurantDetailComponent)) private parentComponent: RestaurantDetailComponent
     ) {
         super(logger, parentComponent.dynamicComponentLoader, parentComponent.injector, elementRef);
         this.customStaticRefID += ++RestaurantDetailCustomWebsiteControlComponent.ID;
-        this.parent = parentComponent;
-        this.customizedForm = fb.group({ WebSite: ["", Validators.compose(this.parent.entity.getValidators()["WebSite"])] });
-        parentComponent.restaurantForm.addControl('WebSite', this.customizedForm.controls["WebSite"]);
+
         logger.log("Restaurant customization initiated!");
+    }
+
+    ngOnInit() {
+        super.ngOnInit();
+        var that = this;
+        this.parentComponent.dynamicComponentLoader.loadIntoLocation(TextboxComponent, this.elementRef, 'websiteControl').then((newComp: ComponentRef) => {
+            newComp.instance.setParentComponent(that.parentComponent, 'WebSite');
+        });
     }
 }

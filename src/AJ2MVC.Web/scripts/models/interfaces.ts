@@ -1,10 +1,16 @@
-﻿import { Injectable } from 'angular2/core';
-import { Validator } from 'angular2/common';
+﻿import { Injectable, EventEmitter } from 'angular2/core';
+import { Validator, ControlGroup } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
 import { Storage, MenuItem, IMenuItem } from './../controls/menu';
 
 export interface IEmptyConstruct {
     new (): any;
+}
+
+export class ValidatorDefinition {
+    Validator: Function;
+    ErrorMessage: string;
+    ErrorCode: string;
 }
 
 export class FieldDefinition {
@@ -18,7 +24,7 @@ export interface IDataStructure {
     
     getNewInstance(): IDataStructure;
     // EC5 for know, no map object definition
-    getValidators(): { [propName: string]: Function[]; };
+    getValidators(): { [propName: string]: ValidatorDefinition[]; };
     setModelData(modelData: IDataStructure): void;
 
     browseFields: Array<FieldDefinition>;
@@ -49,11 +55,13 @@ export class FieldFilter {
 
 @Injectable()
 export abstract class IEntityDataService {
-    data$: Observable<Array<any>>;
+    data: Array<any>;
+    dataObserver: EventEmitter<Array<IDataStructure>>;
     abstract getEntityNameID(DataStructure: IEmptyConstruct): string;
     abstract initdataLoad(DataStructure: IEmptyConstruct): void;
     abstract reloadData(DataStructure: IEmptyConstruct): void;
     abstract getCurrentLibrary(DataStructure: IEmptyConstruct): Array<any>;
+    abstract getCurrentLibraryWithFilters(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Array<any>;    
     abstract fetchEntity(DataStructure: IEmptyConstruct, ID: string): Promise<any>;
     abstract updateEntity(DataStructure: IEmptyConstruct, entity: any): void;
     abstract createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
@@ -72,14 +80,22 @@ export class OverrideComponentDescriptor {
     }
 }
 
+export class ControlDefinition {
+    placeHolder: string;
+    controlComponent: any;
+    propertyName: string; 
+}
+
 @Injectable()
 export class IOverrideDetailComponent {
     static PlaceHolder: string = "DEFAULTANCHOR";
     getInstanceID(): string { return "NotDefined"; }
 }
 
+@Injectable()
 export class IEntityContainer {
     public entity: IDataStructure;
+    public entityForm: ControlGroup;
 }
 
 export class DecoratorRegistrations {

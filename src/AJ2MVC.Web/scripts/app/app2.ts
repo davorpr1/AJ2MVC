@@ -18,7 +18,7 @@ import { PermissionProvider } from './../services/permission-provider.service';
 
 import { FoodMenu } from './../models/foodmenu';
 import { Restaurant } from './../models/restaurant';
-import { IDataStructure, IEntityDataService, OverrideComponentDescriptor } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, OverrideComponentDescriptor, IEntityContainer } from './../models/interfaces';
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
@@ -71,7 +71,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 }
 
 bootstrap(App2Component, [
-    RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory,
+    RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory, IEntityContainer,
 
     provide(IEntityDataService, { useClass: RhetosRestService }),
 

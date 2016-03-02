@@ -1,25 +1,19 @@
-﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Inject, forwardRef } from 'angular2/core';
-import { FORM_DIRECTIVES } from 'angular2/common';
+﻿import { Component, ComponentRef, forwardRef, Inject } from 'angular2/core';
 import { TestLogger } from './../services/logger';
-import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent } from './../models/interfaces';
+import { OverrideDetailComponent } from './../models/interfaces';
 import { RestaurantDetailComponent } from './../components/restaurant/restaurant-detail.component';
-import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
+import { SuperTextboxWrapComponent } from './../controls/super-textbox.wrap-control';
 
-@Component({
-    directives: [FORM_DIRECTIVES],
-    template: ``
-})
+@Component({ template: `` })
 @OverrideDetailComponent({
-    hostComponent: RestaurantDetailCustomWebsiteControlComponent
+    hostComponent: RestaurantDetailComponent
 })
-export class RestaurantDetailNameLabelOverrideComponent implements IOverrideDetailComponent {
-    constructor(private logger: TestLogger,
-        private elementRef: ElementRef,
-        @Inject(forwardRef(() => RestaurantDetailCustomWebsiteControlComponent)) parentComponent: RestaurantDetailCustomWebsiteControlComponent
-    ) {
-        ((parentComponent.parent as RestaurantDetailComponent).elementRef.nativeElement as HTMLElement).querySelectorAll("label[for='Name'").item(0).textContent += ' - Super';
+export class RestaurantDetailNameLabelOverrideComponent {
 
+    constructor(private logger: TestLogger,
+        @Inject(forwardRef(() => RestaurantDetailComponent)) parentComponent: RestaurantDetailComponent
+    ) {
+        parentComponent.controls.filter(x => x.propertyName == 'Name').map(x => x.controlComponent = SuperTextboxWrapComponent);
         logger.log("Restaurant customization 2 initiated!");
     }
-    getInstanceID(): string { return "NotDefined"; }
 }

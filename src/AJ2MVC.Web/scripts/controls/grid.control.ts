@@ -1,7 +1,7 @@
 ﻿import { Input, Output, HostBinding, AfterViewInit, HostListener, EventEmitter, Component, Self, Attribute, ViewEncapsulation, ElementRef } from 'angular2/core';
 import { ControlValueAccessor, NgControl } from 'angular2/common';
 import { Router } from 'angular2/router';
-import { IEntityDataService, IEmptyConstruct, IDataStructure } from './../models/interfaces';
+import { IEntityDataService, IEmptyConstruct, IDataStructure, FieldFilter } from './../models/interfaces';
 import { BaseEntity } from './../models/entitybase';
 
 @Component({
@@ -15,6 +15,17 @@ export class GridComponent implements AfterViewInit {
         this.EntityDataStructure = EntityType;
         this.registerDataService();
     }
+    @Input() set filters(newFilters: Array<FieldFilter>) {
+        this._filters = newFilters;
+        var that = this;
+        if (this._filters && this._filters.length > 0 && this.gridContainer && this.showEntity) {
+            this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => {
+                that.showEntityList = res;
+                that.gridContainer.pqGrid('option', 'dataModel.data', that.showEntityList);
+                that.gridContainer.pqGrid('refreshDataAndView');
+            });
+        }
+    }
 
     private _controlID: number;
     private static staticID: number = 1;
@@ -23,6 +34,7 @@ export class GridComponent implements AfterViewInit {
     private gridColumns: any[];
     private EntityDataStructure: IEmptyConstruct = BaseEntity;
     private gridContainer: JQuery;
+    private _filters: Array<FieldFilter> = null;
 
     constructor(private elRef: ElementRef,
         private router: Router,
@@ -81,8 +93,12 @@ export class GridComponent implements AfterViewInit {
                 }
             });
             this.gridContainer.pqGrid("option", "scrollModel.autoFit", true);
-            this.entityService.data$.subscribe((updatedEntities: Array<any>) => {
-                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+            this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
+                if (!this._filters || this._filters.length === 0) {
+                    this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
+                } else {
+                    this.showEntityList = this.entityService.getCurrentLibraryWithFilters(this.EntityDataStructure, this._filters);
+                }
                 this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
                 this.gridContainer.pqGrid('refreshDataAndView');
             });
@@ -92,9 +108,17 @@ export class GridComponent implements AfterViewInit {
                 alert(e);
             }
 
-            this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
-            this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
-            this.gridContainer.pqGrid('refreshDataAndView');
+            if (this._filters && this._filters.length > 0) {
+                this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => {
+                    this.showEntityList = res;
+                    this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
+                    this.gridContainer.pqGrid('refreshDataAndView');
+                });
+            } else {
+                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
+                this.gridContainer.pqGrid('option', 'dataModel.data', this.showEntityList);
+                this.gridContainer.pqGrid('refreshDataAndView');
+            }
         }
     }
 

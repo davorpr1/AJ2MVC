@@ -4,7 +4,7 @@ import { EventEmitter } from 'angular2/core';
 import { Validators, Control } from 'angular2/common';
 
 import { BaseEntity } from './../models/entitybase';
-import { FieldDefinition } from './../models/interfaces';
+import { FieldDefinition, ValidatorDefinition } from './../models/interfaces';
 
 function containsCommaValidator(control: Control): { [s: string]: boolean } {
     if (!control.value || !control.value.match(/[A-Za-z0-9 ]\,[ A-Za-z]/)) {
@@ -34,11 +34,15 @@ export class Restaurant extends BaseEntity {
     getModuleName(): string { return "FoodOrder"; }
     getEntityName(): string { return "Restaurant"; }
 
-    public getValidators(): { [propName: string]: Function[]; } {
+    public getValidators(): { [propName: string]: ValidatorDefinition[]; } {
         return {
-            "Name": [Validators.required, Validators.minLength(3)],
-            "Address": [Validators.required, containsCommaValidator],
-            "WebSite": [Validators.required, urlValidator]
+            "Name": [{ Validator: Validators.required, ErrorCode: 'required', ErrorMessage: "Name is required" },
+                { Validator: Validators.minLength(3), ErrorCode: 'minlength', ErrorMessage: "Name's minimum length is 3 characters" }
+                ],
+            "Address": [{ Validator: Validators.required, ErrorCode: 'required', ErrorMessage: "Address is required" },
+                        { Validator: containsCommaValidator, ErrorCode: 'noComma', ErrorMessage: "Address has to contain comma separator" }],
+            "WebSite": [{ Validator: Validators.required, ErrorCode: 'required', ErrorMessage: "WebSite is required" },
+                        { Validator: urlValidator, ErrorCode: 'notValidURL', ErrorMessage: "WebSite doesn't have valid URL format" }]
         };
     }
 

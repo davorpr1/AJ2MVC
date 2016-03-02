@@ -1,6 +1,7 @@
 ﻿import { EventEmitter } from 'angular2/core';
 import { Validators, Validator } from 'angular2/common';
 import { BaseEntity } from './../../models/entitybase';
+import { ValidatorDefinition } from './../../models/interfaces';
 
 export class Claim extends BaseEntity {
     public ClaimResource: string;
@@ -12,7 +13,7 @@ export class Claim extends BaseEntity {
     getModuleName(): string { return "Common"; }
     getEntityName(): string { return "Claim"; }
 
-    getValidators(): { [propName: string]: Function[]; } { return { }; }
+    getValidators(): { [propName: string]: ValidatorDefinition[]; } { return { }; }
 
     toRhetosRESTQueryString(claim: Claim): string {
         if (claim) return '{"ClaimResource":"' + claim.ClaimResource + '","ClaimRight":"' + claim.ClaimRight + '"}';

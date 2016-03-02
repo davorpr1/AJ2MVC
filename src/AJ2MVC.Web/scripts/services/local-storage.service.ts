@@ -1,5 +1,5 @@
 ﻿import {Observable} from 'rxjs/Observable';
-import { Injectable } from 'angular2/core';
+import { Injectable, EventEmitter } from 'angular2/core';
 
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
@@ -11,8 +11,8 @@ import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter } from
 
 @Injectable()
 export class LocalStorageService implements IEntityDataService {
-    data$: Observable<Array<IDataStructure>>;
-    private _dataObserver: any;
+    data: Array<IDataStructure>;
+    public dataObserver: EventEmitter<Array<IDataStructure>> = new EventEmitter<Array<IDataStructure>>();
     private _loaded: boolean = false;
     protected _dummyEntityInstances: Array<IDataStructure> = new Array<IDataStructure>();
     protected entCounter: number = 1;
@@ -37,18 +37,21 @@ export class LocalStorageService implements IEntityDataService {
     public getEntityNameID(DataStructure: IEmptyConstruct): string { return this.getDummy(DataStructure).getNameID(); }
     public entityToJSON(entity: IDataStructure): string { return entity.entityToJSON(); }
     public fromRawEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): IDataStructure { return this.getDummy(DataStructure).fromRawEntity(entity); }
-
-    private _dataStore: {
-        data: Array<IDataStructure>
-    };
-
+    
     constructor() {
-        this.data$ = new Observable((observer: any) => this._dataObserver = observer).share();
-        this._dataStore = { data: [] };
+        this.data = new Array<IDataStructure>();
     }
 
     getCurrentLibrary(DataStructure: IEmptyConstruct): Array<typeof DataStructure> {
-        return this._dataStore.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+        return this.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+    }
+
+    getCurrentLibraryWithFilters(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Array<typeof DataStructure> {
+        var res: Array<typeof DataStructure> = this.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+        filters.forEach(fieldFilter => {
+            res = res.filter((x: any) => (x[fieldFilter.Field].toString() as string).includes(fieldFilter.Term));
+        });
+        return res;
     }
 
     public initdataLoad(DataStructure: IEmptyConstruct) {
@@ -66,7 +69,7 @@ export class LocalStorageService implements IEntityDataService {
 
     fetchEntity(DataStructure: IEmptyConstruct, id: string): Promise<typeof DataStructure> {
         let res: typeof DataStructure = null;
-        this._dataStore.data.every((t: IDataStructure) => {
+        this.data.every((t: IDataStructure) => {
             if (t.ID === id && t instanceof DataStructure) {
                 res = this.createEntityInstance(DataStructure, t);
                 return false;
@@ -88,19 +91,19 @@ export class LocalStorageService implements IEntityDataService {
     }
 
     reloadData(DataStructure: IEmptyConstruct) {
-        for (var index: number = this._dataStore.data.length - 1; index >= 0; index--) {
-            if (this._dataStore.data[index] instanceof DataStructure) { this._dataStore.data.splice(index, 1); }
+        for (var index: number = this.data.length - 1; index >= 0; index--) {
+            if (this.data[index] instanceof DataStructure) { this.data.splice(index, 1); }
         }
-        this._dataStore.data.push(({ ID: this.getEntityNameID(DataStructure) + this.entCounter } as IDataStructure));
+        this.data.push(({ ID: this.getEntityNameID(DataStructure) + this.entCounter } as IDataStructure));
 
-        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+        this.dataObserver.next(this.data);
     }
 
     createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
         this.entCounter++;
         entity.ID = this.getEntityNameID(DataStructure) + this.entCounter;
-        this._dataStore.data.push(entity);
-        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+        this.data.push(entity);
+        this.dataObserver.next(this.data);
     }
 
     updateEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
@@ -108,21 +111,21 @@ export class LocalStorageService implements IEntityDataService {
             this.createEntity(DataStructure, entity);
             return;
         }
-        this._dataStore.data.forEach((rest, i) => {
-            if (entity.ID === rest.ID) { this._dataStore.data[i] = entity; }
+        this.data.forEach((rest, i) => {
+            if (entity.ID === rest.ID) { this.data[i] = entity; }
         });
-        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+        this.dataObserver.next(this.data);
     }
 
     deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
-        this._dataStore.data.forEach((t, index) => {
-            if (t.ID === entity.ID && t instanceof DataStructure) { this._dataStore.data.splice(index, 1); }
+        this.data.forEach((t, index) => {
+            if (t.ID === entity.ID && t instanceof DataStructure) { this.data.splice(index, 1); }
         });
-        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+        this.dataObserver.next(this.data);
     }
 
     filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<typeof DataStructure[]> {
-        let res: Array<any> = this._dataStore.data.filter(x => x instanceof DataStructure);
+        let res: Array<any> = this.data.filter(x => x instanceof DataStructure);
         filters.forEach(fieldFilter => {
             res = res.filter(x => (x[fieldFilter.Field].toString() as string).includes(fieldFilter.Term));
         });

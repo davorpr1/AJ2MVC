@@ -1,4 +1,4 @@
-﻿/// <binding AfterBuild='libs, rxjs, transpiledJSModuleDefinition' Clean='clean' />
+﻿/// <binding AfterBuild='libs, rxjs, transpiledJSModuleDefinition, templates' Clean='clean' />
 var gulp = require('gulp');
 var rimraf = require('rimraf');
 var concat = require('gulp-concat');
@@ -15,6 +15,7 @@ var rhetosPath = 'C:/Projects/2CS/RhetosDEV/Rhetos';
 var paths = {
     npm: "./node_modules/",
     lib: "./wwwroot/lib/",
+    componentTemplates: "./wwwroot/components/",
     compiledTS: "./dist/",
     appjs: "./wwwroot/js/"
 };
@@ -102,6 +103,10 @@ gulp.task("transpiledJSModuleDefinition", function () {
 
 gulp.task('rxjs', function () {
     return gulp.src(paths.npm + 'rxjs/**/*.js').pipe(gulp.dest(paths.lib + 'rxjs/'));
+});
+
+gulp.task('templates', function () {
+    return gulp.src('./scripts/components/**/*.html').pipe(gulp.dest(paths.componentTemplates));
 });
 
 gulp.task("clean", function (callback) {

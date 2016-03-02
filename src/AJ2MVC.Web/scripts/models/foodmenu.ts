@@ -3,7 +3,7 @@
 import { EventEmitter } from 'angular2/core';
 import { Validators, Validator } from 'angular2/common';
 import { BaseEntity } from './../models/entitybase';
-import { FieldDefinition } from './../models/interfaces';
+import { FieldDefinition, ValidatorDefinition } from './../models/interfaces';
 import * as momment_ from 'moment';
 const moment: moment.MomentStatic = (<any>momment_)["default"] || momment_;
 
@@ -35,10 +35,10 @@ export class FoodMenu extends BaseEntity {
     getModuleName(): string { return "FoodOrder"; }
     getEntityName(): string { return "FoodMenu"; }
 
-    getValidators(): { [propName: string]: Function[]; } {
+    getValidators(): { [propName: string]: ValidatorDefinition[]; } {
         return {
-            "Name": [Validators.required, Validators.minLength(3)],
-            // "ActiveUntilDate": [Validators.required]
+            "Name": [{ Validator: Validators.required, ErrorCode: 'required', ErrorMessage: "Name is required" },
+                { Validator: Validators.minLength(3), ErrorCode: 'minlength', ErrorMessage: "Name's minimum length is 3 characters" }]
         };
     }
 

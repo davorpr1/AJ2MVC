@@ -1,5 +1,5 @@
 ﻿import {Observable} from 'rxjs/Observable';
-import { Injectable } from 'angular2/core';
+import { Injectable, EventEmitter } from 'angular2/core';
 import {Http, RequestOptions, Headers} from 'angular2/http';
 
 import 'rxjs/add/operator/share';
@@ -31,8 +31,8 @@ export class DataStructureWithClaims {
 
 @Injectable()
 export class RhetosRestService implements IEntityDataService {
-    data$: Observable<Array<IDataStructure>>;
-    private _dataObserver: any;
+    public data: Array<IDataStructure>;
+    public dataObserver: EventEmitter<Array<IDataStructure>> = new EventEmitter<Array<IDataStructure>>();
     protected _http: Http;
     protected _permissionHolderPromise: Promise<MyClaim[]>;
     protected _dummyEntityInstances: Array<DataStructureWithClaims> = new Array<DataStructureWithClaims>();
@@ -62,15 +62,10 @@ export class RhetosRestService implements IEntityDataService {
         return res;
     }
 
-    private _dataStore: {
-        data: Array<IDataStructure>
-    };
-
     constructor(http: Http, private permissionProvider: PermissionProvider) {
-        this.data$ = new Observable((observer: any) => this._dataObserver = observer).share();
+        this.data = new Array<IDataStructure>();
         this._http = http;
         this.permissionProvider.data$.subscribe(newPermissions => this.updatePermissions(newPermissions));
-        this._dataStore = { data: [] };
     }
 
     private updatePermissions(permissions: MyClaim[]) {
@@ -93,7 +88,16 @@ export class RhetosRestService implements IEntityDataService {
     } 
 
     getCurrentLibrary(DataStructure: IEmptyConstruct): Array<typeof DataStructure> {
-        return this._dataStore.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+        return this.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+    }
+
+    getCurrentLibraryWithFilters(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Array<typeof DataStructure> {
+        var res: Array<typeof DataStructure> = this.data.filter(ent => ent instanceof DataStructure).map((x: any) => x as IEmptyConstruct);
+        filters.forEach(fieldFilter => {
+            // TODO: local filter per operation type implementation
+            res = res.filter((x: any) => (x[fieldFilter.Field].toString() as string).includes(fieldFilter.Term));
+        });
+        return res;
     }
 
     initdataLoad(DataStructure: IEmptyConstruct) {
@@ -111,7 +115,7 @@ export class RhetosRestService implements IEntityDataService {
 
     fetchEntity(DataStructure: IEmptyConstruct, id: string): Promise<typeof DataStructure> {
         let res: typeof DataStructure = null;
-        this._dataStore.data.every((t: IDataStructure) => {
+        this.data.every((t: IDataStructure) => {
             if (t.ID === id) {
                 res = this.createEntityInstance(DataStructure, t);
                 return false;
@@ -131,15 +135,15 @@ export class RhetosRestService implements IEntityDataService {
                     (data) => {
                         let entObj: IDataStructure = this.fromRawEntity(DataStructure, data.json());
                         let found: boolean = false;
-                        this._dataStore.data.forEach((rest, i) => {
+                        this.data.forEach((rest, i) => {
                             if (entObj.ID === rest.ID) {
-                                this._dataStore.data[i] = entObj;
+                                this.data[i] = entObj;
                                 found = true;
                             }
                         });
-                        if (!found) this._dataStore.data.push(entObj);
+                        if (!found) this.data.push(entObj);
 
-                        if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                        this.dataObserver.next(this.data);
                         return this.createEntityInstance(DataStructure, entObj);
                     }, (error: any) => {
                         console.log('Could not create entity.');
@@ -159,18 +163,20 @@ export class RhetosRestService implements IEntityDataService {
                     data.json().Records.map((rec: IDataStructure) => {
                         let preparedEnt: IDataStructure = this.fromRawEntity(DataStructure, rec);
                         let found: boolean = false;
-                        this._dataStore.data.forEach((rest, i) => {
+                        this.data.forEach((rest, i) => {
                             if (preparedEnt.ID === rest.ID) {
-                                this._dataStore.data[i] = preparedEnt;
+                                this.data[i] = preparedEnt;
                                 found = true;
                             }
                         });
                         if (!found) toAdd.push(preparedEnt);
                     });
 
-                    this._dataStore.data = this._dataStore.data.concat(toAdd);
-                    if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
-                }, error => console.log('Could not load data.'));
+                    this.data = this.data.concat(toAdd);
+                    this.dataObserver.next(this.data);
+                }, error => {
+                    console.log('Could not load data.');
+                });
         } else {
             if (perm.PermissionLoaded) {
                 throw new Error('User does not have right to load: ' + this.getEntityNameID(DataStructure));
@@ -191,8 +197,8 @@ export class RhetosRestService implements IEntityDataService {
             this._http.post(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/', this.entityToJSON(entity), options)
                 .subscribe(data => {
                     entity.ID = data.json().ID;
-                    this._dataStore.data.push(entity);
-                    if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                    this.data.push(entity);
+                    this.dataObserver.next(this.data);
                 }, (error: any) => console.log('Could not create entity.'));
         }
     }
@@ -208,20 +214,20 @@ export class RhetosRestService implements IEntityDataService {
 
         this._http.put(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID, this.entityToJSON(entity), options)
             .subscribe(data => {
-                this._dataStore.data.forEach((rest, i) => {
-                    if (entity.ID === rest.ID) { this._dataStore.data[i] = entity; }
+                this.data.forEach((rest, i) => {
+                    if (entity.ID === rest.ID) { this.data[i] = entity; }
                 });
 
-                if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+                this.dataObserver.next(this.data);
             }, (error: any) => console.log('Could not update entity.'));
     }
 
     deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
         this._http.delete(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID).subscribe((response: any) => {
-            this._dataStore.data.forEach((t, index) => {
-                if (t.ID === entity.ID) { this._dataStore.data.splice(index, 1); }
+            this.data.forEach((t, index) => {
+                if (t.ID === entity.ID) { this.data.splice(index, 1); }
             });
-            if (this._dataObserver) this._dataObserver.next(this._dataStore.data);
+            this.dataObserver.next(this.data);
         }, (error: any) => console.log('Could not delete entity.'));
     }
 

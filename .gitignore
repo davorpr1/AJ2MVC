@@ -5,3 +5,5 @@
 /src/AJ2MVC.Web/wwwroot/lib/*
 /src/AJ2MVC.Web/wwwroot/js/*
 /src/AJ2MVC.Rhetos/obj/*
+/src/AJ2MVC.Web/*.zip
+/src/AJ2MVC.Web/wwwroot/components/*

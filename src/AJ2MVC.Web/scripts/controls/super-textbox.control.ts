@@ -9,42 +9,36 @@ declare var jQuery: JQueryStatic;
 
 @Component({
     selector: 'super-textbox[ngControl], super-textbox[ngFormControl], super-textbox[ngModel]',
-    providers: [NgControl],
     encapsulation: ViewEncapsulation.Emulated,
-    template: `<input id="inputCon" type="text" (blur)="touched()" (keypress)="dataChange()" [(value)]="_value">`
+    template: `<input id="inputCon" type="text" [(value)]="_value">`,
+    host: {
+        '(change)': 'onChange($event.target.value)',
+        '(input)': 'onChange($event.target.value)',
+        '(blur)': 'onTouched()'
+    },
 })
 export class SuperTextboxComponent implements ControlValueAccessor, AfterViewInit {
-    @Input('value') _value: string = "";
-    @Output('change') onChange: EventEmitter<any> = new EventEmitter();
-    @Output() private onSelected: EventEmitter<string> = new EventEmitter<string>();
-
-    @HostListener('blur', ['$event'])
-    @Output('touch') onTouched: EventEmitter<any> = new EventEmitter();
-
+    @Input('val') _value: string = "";
+    onChange: Function = (_: any) => { };
+    
+    onTouched: Function = () => { };
     private _controlID: number;
     private static staticID: number = 1;
-    @Input() private dataSource: IEntityDataService;
-    @Input() private entityType: IEmptyConstruct;
 
     constructor( @Self() cd: NgControl, private elRef: ElementRef) {
         cd.valueAccessor = this; // Validation will not work if we don't set the control's value accessor
         this._controlID = ++SuperTextboxComponent.staticID;
     }
-    touched(event: any) {
-        this.onTouched.next(event);
-    }
-    dataChange(event: any) {
-        this.onChange.next(this._value);
-    }
     registerOnChange(fn: (_: any) => void): void {
-        this.onChange.subscribe(fn);
+        this.onChange = (value: any) => { fn(value); };
     }
-    registerOnTouched(fn: () => void): void {
-        this.onTouched.subscribe(fn);
-    }
+    registerOnTouched(fn: () => void): void { this.onTouched = fn; }
+
     writeValue(value: any): void {
+        if (!value) { return; }
         this._value = value;
     }
+
     ngAfterViewInit() {
         var that = this;
         jQuery(this.elRef.nativeElement).find("#inputCon").attr('id', 'inputCon_SuperTX_' + this._controlID);

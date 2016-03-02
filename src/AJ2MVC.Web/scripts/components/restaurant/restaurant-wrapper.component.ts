@@ -7,14 +7,17 @@ import { Restaurant } from './../../models/restaurant';
 import { IEntityDataService, IEntityContainer } from './../../models/interfaces';
 
 import { RestaurantDetailComponent } from './../../components/restaurant/restaurant-detail.component';
+import { FoodMenuListComponent } from './../../components/foodmenu/foodmenu-list.component';
 
 @Component({
-    directives: [RestaurantDetailComponent],
-    template: `<table><tr><td>First instance<restaurant-detail [entityID]="entID"></restaurant-detail></td>
-            <td>Second instance
-            <restaurant-detail [entityID]="entID"></restaurant-detail>
+    directives: [RestaurantDetailComponent, FoodMenuListComponent],
+    template: `<table><tr>
+            <td>First instance  <restaurant-detail [entityID]="entID" #restaurant></restaurant-detail></td>
+            <td>Second instance <restaurant-detail [entityID]="entID"></restaurant-detail>
             </td></tr>
-            </table>
+           </table>
+            All menu of restaurant {{ restaurant.entity.Name }}
+            <foodmenu-list [restaurantID]="restaurant.entity.ID"></foodmenu-list>            
             End of dual view`
 })
 export class RestaurantWrapperComponent {

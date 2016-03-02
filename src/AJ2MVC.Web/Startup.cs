@@ -83,10 +83,10 @@ namespace AJ2MVC
             {
                 appProxy.RunRhetosProxy(new ProxyOptions
                 {
-                    Host = "desktop-smfsmr4",
-                    Port = "8080",
+                    Host = "dprugovecki-pc",
+                    Port = "8040",
                     Scheme = "http",
-                    HostPathBase = "/Rhetos/REST"
+                    HostPathBase = "/FoodRhetos/REST"
                 });
             });
 

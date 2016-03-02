@@ -1,0 +1,33 @@
+﻿<h3>Food menu details</h3>
+<br />
+<p>{{entity.Name}}</p>
+<form [ngFormModel]="entityForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <input ngControl="Name" type="text" [(ngModel)]="entity.Name">
+        <div *ngIf="entityForm.controls['Name'].hasError('required') && !entityForm.controls['Name'].pristine" class="ui error message">Menu name is required</div>
+    </div>
+
+    <div class="form-group">
+        <label for="ActiveFromDate">Active from</label>
+        <datepick ngControl="ActiveFromDate" [(ngModel)]="entity.ActiveFromDate" [maxDate]="entity.ActiveUntilDate"></datepick>
+        <div *ngIf="entityForm.controls['ActiveFromDate'].hasError('required') && !entityForm.controls['ActiveFromDate'].pristine" class="ui error message">Date from which menu is active is required</div>
+    </div>
+
+    <div class="form-group">
+        <label for="ActiveUntilDate">Active until</label>
+        <datepick ngControl="ActiveUntilDate" [(ngModel)]="entity.ActiveUntilDate" [minDate]="entity.ActiveFromDate"></datepick>
+        <div *ngIf="entityForm.controls['ActiveUntilDate'].hasError('required') && !entityForm.controls['ActiveUntilDate'].pristine" class="ui error message">Date until which menu is active is required</div>
+    </div>
+
+    <div class="form-group">
+        <label for="Restaurant">Restaurant</label>
+        <autocomplete ngControl="RestaurantID" [(ngModel)]="entity.RestaurantID" (onSelected)="logValue($event)" [dataSource]="entityService" [entityType]="restaurantType"></autocomplete>
+        <div *ngIf="entityForm.controls['RestaurantID'].hasError('required') && !entityForm.controls['RestaurantID'].pristine" class="ui error message">Restaurant is required</div>
+    </div>
+
+    <div *ngIf="!entityForm.valid && entityForm.dirty"
+         class="alert alert-danger">Food menu data is not valid</div>
+
+    <button type="submit" class="btn btn-default" [disabled]="!entityForm.valid">Submit</button>
+</form>
