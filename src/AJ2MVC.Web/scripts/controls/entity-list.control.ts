@@ -1,4 +1,4 @@
-﻿import { Component, View, provide, OnInit, AfterViewInit, NgZone, ApplicationRef, Input, ChangeDetectorRef, Pipe, PipeTransform } from 'angular2/core';
+﻿import { Component, View, provide, OnInit, AfterViewInit, NgZone, ApplicationRef, Input, ChangeDetectorRef, Pipe, PipeTransform, OnDestroy } from 'angular2/core';
 import { DatePipe } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
@@ -45,7 +45,8 @@ export class WrapperPipe implements PipeTransform {
         <button type="button" class="info" (click)="newEntity()">New {{ showEntity.getEntityName() }}</button>
         `
 })
-export class EntityListControl implements OnInit, AfterViewInit {
+export class EntityListControl implements OnInit, AfterViewInit, OnDestroy {
+    @Input() dataLoadOnInit: boolean = true;
     @Input() set entityType(EntityType: IEmptyConstruct) {
         this.showEntity = new EntityType();
         this.EntityDataStructure = EntityType;
@@ -54,7 +55,7 @@ export class EntityListControl implements OnInit, AfterViewInit {
     }
     @Input() editLink: string = "";
 
-    @Input() set filters(newFilters: Array<FieldFilter>) {
+    public setFilters(newFilters: Array<FieldFilter>) {
         this._filters = newFilters;
         var that = this;
         if (this._filters && this._filters.length > 0 && this.showEntity) {
@@ -69,6 +70,9 @@ export class EntityListControl implements OnInit, AfterViewInit {
     private fields: Array<FieldDefinition> = new Array<FieldDefinition>();
     private _rerenderRequired: boolean = true;
     private cd: number = 0;
+    static idComponent: number = 0;
+    static destroyedOnes: Array<number>;
+    private myIDComponent: number;
 
     constructor(private logger: TestLogger,
         gds: GlobalDataSharing,
@@ -88,27 +92,41 @@ export class EntityListControl implements OnInit, AfterViewInit {
         }, 250);
 
         logger.log("Entity list component initiated!");
+        this.myIDComponent = ++EntityListControl.idComponent;
+        if (!EntityListControl.destroyedOnes) EntityListControl.destroyedOnes = new Array<number>();
     }
 
+    ngOnDestroy() {
+        EntityListControl.destroyedOnes.push(this.myIDComponent);
+        this.subscription.unsubscribe();
+        this.logger.log("ENTITYLIST destroyed: (ID: " + this.myIDComponent + ', filters: ' + ((this._filters) ? this._filters.length : 0) + ')');
+    }
+    private subscription: any;
     private registerDataService() {
         if (this.showEntity) {
             var that = this;
-            this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
-                if (!this._filters || this._filters.length === 0) {
-                    this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
-                } else {
-                    this.showEntityList = this.entityService.getCurrentLibraryWithFilters(this.EntityDataStructure, this._filters);
+            this.subscription = this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
+                // if still valid
+                if (!EntityListControl.destroyedOnes.find(x => x == this.myIDComponent)) {
+                    that.logger.log("ENTITYLIST UPDATED DATA: EntityListID: " + that.myIDComponent);
+                    if (!that._filters || that._filters.length === 0) {
+                        that.showEntityList = that.entityService.getCurrentLibrary(that.EntityDataStructure);
+                    } else {
+                        that.showEntityList = that.entityService.getCurrentLibraryWithFilters(that.EntityDataStructure, that._filters);
+                    }
                 }
             });
-            try {
-                this.entityService.initdataLoad(this.EntityDataStructure);
-            } catch (e) {
-                alert(e);
-            }
-            if (this._filters && this._filters.length > 0) {
-                this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => { that.showEntityList = res; });
-            } else {
-                this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+            if (this.dataLoadOnInit) {
+                try {
+                    this.entityService.initdataLoad(this.EntityDataStructure);
+                } catch (e) {
+                    alert(e);
+                }
+                if (this._filters && this._filters.length > 0) {
+                    this.entityService.filterData(this.EntityDataStructure, this._filters).then((res: any[]) => { that.showEntityList = res; });
+                } else {
+                    this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure)
+                }
             }
         }
     }

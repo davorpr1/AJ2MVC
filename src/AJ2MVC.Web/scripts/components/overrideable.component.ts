@@ -11,6 +11,7 @@ import { ComponentOverridesFactory } from './../factories/component-overrides.fa
 export class OverrideableDetailComponent implements OnInit {
 
     public controls: Array<any> = new Array<{ placeHolder: string, component: any, propertyName: string }>();
+    public initializationComplete: EventEmitter<number> = new EventEmitter<number>();
 
     constructor(private logger_ODC: TestLogger,
         private dynamicComponentLoader_ODC: DynamicComponentLoader,
@@ -57,6 +58,7 @@ export class OverrideableDetailComponent implements OnInit {
                     if (comp.instance.postControlsCreatedCallback)
                         comp.instance.postControlsCreatedCallback();
                 });
+                this.initializationComplete.next(1);
             }
         });
 

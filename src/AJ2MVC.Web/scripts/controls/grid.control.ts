@@ -15,7 +15,8 @@ export class GridComponent implements AfterViewInit {
         this.EntityDataStructure = EntityType;
         this.registerDataService();
     }
-    @Input() set filters(newFilters: Array<FieldFilter>) {
+    @Input() editLink: string = "";
+    public setFilters(newFilters: Array<FieldFilter>) {
         this._filters = newFilters;
         var that = this;
         if (this._filters && this._filters.length > 0 && this.gridContainer && this.showEntity) {
@@ -43,8 +44,12 @@ export class GridComponent implements AfterViewInit {
         this._controlID = ++GridComponent.staticID;
     }
 
-    openDetail(item: IDataStructure) {
-        this.router.navigate([this.showEntity.getNameID() + '_DetailComponent', { id: item.ID }]);
+    openDetail(entity: IDataStructure) {
+        if (this.editLink.length > 0) {
+            this.router.navigate([this.editLink, { id: entity.ID }]);
+        } else {
+            this.router.navigate([this.showEntity.getNameID() + '_DetailComponent', { id: entity.ID }]);
+        }
     }
 
     registerDataService() {
