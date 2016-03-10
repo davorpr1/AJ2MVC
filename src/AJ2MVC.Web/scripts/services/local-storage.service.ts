@@ -7,12 +7,13 @@ import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
 
-import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged } from './../models/interfaces';
 
 @Injectable()
 export class LocalStorageService implements IEntityDataService {
     data: Array<IDataStructure>;
-    public dataObserver: EventEmitter<Array<IDataStructure>> = new EventEmitter<Array<IDataStructure>>();
+    public dataObserver: EventEmitter<DataChanged> = new EventEmitter<DataChanged>();
+    public changesCommitObserver: EventEmitter<Array<ChangesCommit>> = new EventEmitter<Array<ChangesCommit>>();
     private _loaded: boolean = false;
     protected _dummyEntityInstances: Array<IDataStructure> = new Array<IDataStructure>();
     protected entCounter: number = 1;
@@ -96,14 +97,14 @@ export class LocalStorageService implements IEntityDataService {
         }
         this.data.push(({ ID: this.getEntityNameID(DataStructure) + this.entCounter } as IDataStructure));
 
-        this.dataObserver.next(this.data);
+        this.dataObserver.next({ ID: "", data: this.data });
     }
 
     createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
         this.entCounter++;
         entity.ID = this.getEntityNameID(DataStructure) + this.entCounter;
         this.data.push(entity);
-        this.dataObserver.next(this.data);
+        this.dataObserver.next({ ID: "", data: this.data });
     }
 
     updateEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
@@ -114,14 +115,14 @@ export class LocalStorageService implements IEntityDataService {
         this.data.forEach((rest, i) => {
             if (entity.ID === rest.ID) { this.data[i] = entity; }
         });
-        this.dataObserver.next(this.data);
+        this.dataObserver.next({ ID: "", data: this.data });
     }
 
     deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
         this.data.forEach((t, index) => {
             if (t.ID === entity.ID && t instanceof DataStructure) { this.data.splice(index, 1); }
         });
-        this.dataObserver.next(this.data);
+        this.dataObserver.next({ ID: "", data: this.data });
     }
 
     filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<typeof DataStructure[]> {

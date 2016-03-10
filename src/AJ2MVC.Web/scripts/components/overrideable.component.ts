@@ -10,7 +10,7 @@ import { ComponentOverridesFactory } from './../factories/component-overrides.fa
 @Injectable()
 export class OverrideableDetailComponent implements OnInit {
 
-    public controls: Array<any> = new Array<{ placeHolder: string, component: any, propertyName: string }>();
+    public controls: Array<any> = new Array<{ placeHolder: string, component: any, propertyName: string, componentInstance: any }>();
     public initializationComplete: EventEmitter<number> = new EventEmitter<number>();
 
     constructor(private logger_ODC: TestLogger,
@@ -40,8 +40,9 @@ export class OverrideableDetailComponent implements OnInit {
         customizeComponentsLeft.subscribe((left: number) => {
             if (left == 0) {
                 this.controls.map(desc => {
-                    var componentCreate: (newComp: ComponentRef, propertyName: string) => void = (newComp: ComponentRef, propertyName: string) => {
-                        that.logger_ODC.log(" *** //// *** Control loaded at (" + propertyName + ")");
+                    var componentCreate: (newComp: ComponentRef, propertyName: string) => void = (newComp: ComponentRef, propPlaceHolder: string) => {
+                        that.logger_ODC.log(" *** //// *** Control loaded at (" + propPlaceHolder + ")");
+                        that.controls.filter(x => x.placeHolder == propPlaceHolder).map(x => x.componentInstance = newComp.instance);
                     };
                     // check if in defined anchors of current component exists targeted placeholder
                     if ((this.elementRef_ODC as any).internalElement.componentView.appElements.filter((x: any) => x.proto.directiveVariableBindings.hasOwnProperty(desc.placeHolder)).length == 0) {
@@ -50,7 +51,7 @@ export class OverrideableDetailComponent implements OnInit {
                         this.dynamicComponentLoader_ODC.loadIntoLocation(desc.controlComponent, this.elementRef_ODC, desc.placeHolder).then((newComp: ComponentRef) => {
                             newComp.instance.setParentComponent(that, desc.propertyName);
 
-                            componentCreate(newComp, desc.propertyName);
+                            componentCreate(newComp, desc.placeHolder);
                         });
                     }
                 });

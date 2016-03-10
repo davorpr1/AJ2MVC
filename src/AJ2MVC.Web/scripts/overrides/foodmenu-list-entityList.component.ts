@@ -6,10 +6,11 @@ import { IDataStructure, IEmptyConstruct } from './../models/interfaces';
 import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent, FieldFilter } from './../models/interfaces';
 import { FoodMenuListComponent } from './../components/foodmenu/foodmenu-list.component';
 import { EntityListControl } from './../controls/entity-list.control';
+import { KendoGridComponent } from './../controls/kendo-grid.control';
 
 @Component({
-    directives: [FORM_DIRECTIVES, EntityListControl],
-    template: `<entity-list [dataLoadOnInit]="false" [entityType]="dataEntity" [editLink]="editLink" #foodmenu_list></entity-list>`
+    directives: [FORM_DIRECTIVES, EntityListControl, KendoGridComponent],
+    template: `<kendo-grid [dataLoadOnInit]="false" [entityType]="dataEntity" [editLink]="editLink" #foodmenu_list></kendo-grid>`
 })
 @OverrideDetailComponent({
     hostComponent: FoodMenuListComponent
@@ -19,7 +20,7 @@ export class FoodMenuListEntityListOverrideComponent implements IOverrideDetailC
     private editLink: string = "/FoodMenuCenter/FoodOrder_FoodMenu_DetailComponent";
     public filters: Array<FieldFilter> = null;
 
-    @ViewChild('foodmenu_list') grid: EntityListControl;
+    @ViewChild('foodmenu_list') grid: KendoGridComponent;
 
     constructor(private logger: TestLogger,
         private elementRef: ElementRef,

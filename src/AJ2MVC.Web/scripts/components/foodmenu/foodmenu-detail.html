@@ -10,19 +10,23 @@
 
     <div class="form-group">
         <label for="ActiveFromDate">Active from</label>
+        <table><tr><td>
         <datepick ngControl="ActiveFromDate" [(ngModel)]="entity.ActiveFromDate" [maxDate]="entity.ActiveUntilDate"></datepick>
+            </td><td>
+        <kendo-datepick [(ngModel)]="entity.ActiveFromDate" [maxDate]="entity.ActiveUntilDate"></kendo-datepick>
+            </td></tr></table>
         <div *ngIf="entityForm.controls['ActiveFromDate'].hasError('required') && !entityForm.controls['ActiveFromDate'].pristine" class="ui error message">Date from which menu is active is required</div>
     </div>
 
     <div class="form-group">
         <label for="ActiveUntilDate">Active until</label>
-        <datepick ngControl="ActiveUntilDate" [(ngModel)]="entity.ActiveUntilDate" [minDate]="entity.ActiveFromDate"></datepick>
+        <kendo-datepick ngControl="ActiveUntilDate" [(ngModel)]="entity.ActiveUntilDate" [minDate]="entity.ActiveFromDate"></kendo-datepick>
         <div *ngIf="entityForm.controls['ActiveUntilDate'].hasError('required') && !entityForm.controls['ActiveUntilDate'].pristine" class="ui error message">Date until which menu is active is required</div>
     </div>
 
     <div class="form-group">
         <label for="Restaurant">Restaurant</label>
-        <autocomplete ngControl="RestaurantID" [(ngModel)]="entity.RestaurantID" (onSelected)="logValue($event)" [dataSource]="entityService" [entityType]="restaurantType"></autocomplete>
+        <dropdown ngControl="RestaurantID" [(ngModel)]="entity.RestaurantID" (onSelected)="logValue($event)" [dataSource]="entityService" [entityType]="restaurantType"></dropdown>
         <div *ngIf="entityForm.controls['RestaurantID'].hasError('required') && !entityForm.controls['RestaurantID'].pristine" class="ui error message">Restaurant is required</div>
     </div>
 

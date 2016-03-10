@@ -53,10 +53,22 @@ export class FieldFilter {
     }
 }
 
+export class ChangesCommit {
+    public ID: string = ""; // change identifier
+    public DataType: IEmptyConstruct;
+    public data: Array<IDataStructure>;
+}
+
+export class DataChanged {
+    public ID: string = ""; // change identifier
+    public data: Array<IDataStructure>;
+}
+
 @Injectable()
 export abstract class IEntityDataService {
     data: Array<any>;
-    dataObserver: EventEmitter<Array<IDataStructure>>;
+    changesCommitObserver: EventEmitter<Array<ChangesCommit>>;
+    dataObserver: EventEmitter<DataChanged>;
     abstract getEntityNameID(DataStructure: IEmptyConstruct): string;
     abstract initdataLoad(DataStructure: IEmptyConstruct): void;
     abstract reloadData(DataStructure: IEmptyConstruct): void;
@@ -84,6 +96,7 @@ export class ControlDefinition {
     placeHolder: string;
     controlComponent: any;
     propertyName: string; 
+    componentInstance: any = null;
 }
 
 @Injectable()

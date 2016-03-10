@@ -32,12 +32,12 @@ import { TextboxComponent } from './../../controls/textbox.control';
         `
 })
 @Injectable()
-export class RestaurantDetailComponent extends OverrideableDetailComponent implements IEntityContainer {
+export class RestaurantDetailComponent extends OverrideableDetailComponent implements IEntityContainer, OnInit {
     @Input() private entityID: string;
     public entity: Restaurant = new Restaurant();
     public controls: Array<ControlDefinition> = [
-        { placeHolder: 'nameControl', propertyName: 'Name', controlComponent: TextboxComponent },
-        { placeHolder: 'addressControl', propertyName: 'Address', controlComponent: TextboxComponent }
+        { placeHolder: 'nameControl', propertyName: 'Name', controlComponent: TextboxComponent, componentInstance: null },
+        { placeHolder: 'addressControl', propertyName: 'Address', controlComponent: TextboxComponent, componentInstance: null }
     ];
     public entityForm: ControlGroup;
 
@@ -69,5 +69,12 @@ export class RestaurantDetailComponent extends OverrideableDetailComponent imple
     onSubmit() {
         this.entityService.updateEntity(Restaurant, this.entity);
         // this.router.navigate(['RestaurantList']);
+    }
+
+    ngOnInit() {
+        this.initializationComplete.subscribe((ha: any) => {
+            this.controls.filter(x => x.propertyName === 'Name').map(x => x.componentInstance.height = 50);
+        });
+        super.ngOnInit();
     }
 }

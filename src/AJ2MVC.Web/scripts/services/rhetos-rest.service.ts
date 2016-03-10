@@ -8,7 +8,7 @@ import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
 
-import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged } from './../models/interfaces';
 import { MyClaim } from './../models/security/claim';
 import { PermissionProvider } from './../services/permission-provider.service';
 
@@ -32,7 +32,8 @@ export class DataStructureWithClaims {
 @Injectable()
 export class RhetosRestService implements IEntityDataService {
     public data: Array<IDataStructure>;
-    public dataObserver: EventEmitter<Array<IDataStructure>> = new EventEmitter<Array<IDataStructure>>();
+    public dataObserver: EventEmitter<DataChanged> = new EventEmitter<DataChanged>();
+    public changesCommitObserver: EventEmitter<Array<ChangesCommit>> = new EventEmitter<Array<ChangesCommit>>();
     protected _http: Http;
     protected _permissionHolderPromise: Promise<MyClaim[]>;
     protected _dummyEntityInstances: Array<DataStructureWithClaims> = new Array<DataStructureWithClaims>();
@@ -66,6 +67,14 @@ export class RhetosRestService implements IEntityDataService {
         this.data = new Array<IDataStructure>();
         this._http = http;
         this.permissionProvider.data$.subscribe(newPermissions => this.updatePermissions(newPermissions));
+        this.changesCommitObserver.subscribe((changes: Array<ChangesCommit>) => {
+            changes.map((changePerType: ChangesCommit) => {
+                // batch or one-by-one save implementation...
+                changePerType.data.map((item: IDataStructure) => {
+                    this.updateEntity(changePerType.DataType, item, changePerType.ID);
+                });
+            });
+        });
     }
 
     private updatePermissions(permissions: MyClaim[]) {
@@ -143,7 +152,7 @@ export class RhetosRestService implements IEntityDataService {
                         });
                         if (!found) this.data.push(entObj);
 
-                        this.dataObserver.next(this.data);
+                        this.dataObserver.next({ ID: "", data: this.data });
                         return this.createEntityInstance(DataStructure, entObj);
                     }, (error: any) => {
                         console.log('Could not create entity.');
@@ -173,7 +182,7 @@ export class RhetosRestService implements IEntityDataService {
                     });
 
                     this.data = this.data.concat(toAdd);
-                    this.dataObserver.next(this.data);
+                    this.dataObserver.next({ ID: "", data: this.data });
                 }, error => {
                     console.log('Could not load data.');
                 });
@@ -198,12 +207,12 @@ export class RhetosRestService implements IEntityDataService {
                 .subscribe(data => {
                     entity.ID = data.json().ID;
                     this.data.push(entity);
-                    this.dataObserver.next(this.data);
+                    this.dataObserver.next({ ID: "", data: this.data });
                 }, (error: any) => console.log('Could not create entity.'));
         }
     }
 
-    updateEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
+    updateEntity(DataStructure: IEmptyConstruct, entity: IDataStructure, emitID?: string) {
         if (!entity.ID) {
             this.createEntity(DataStructure, entity);
             return;
@@ -218,7 +227,7 @@ export class RhetosRestService implements IEntityDataService {
                     if (entity.ID === rest.ID) { this.data[i] = entity; }
                 });
 
-                this.dataObserver.next(this.data);
+                this.dataObserver.next({ ID: (emitID) ? emitID: "", data: this.data });
             }, (error: any) => console.log('Could not update entity.'));
     }
 
@@ -227,7 +236,7 @@ export class RhetosRestService implements IEntityDataService {
             this.data.forEach((t, index) => {
                 if (t.ID === entity.ID) { this.data.splice(index, 1); }
             });
-            this.dataObserver.next(this.data);
+            this.dataObserver.next({ ID: "", data: this.data });
         }, (error: any) => console.log('Could not delete entity.'));
     }
 

@@ -6,10 +6,12 @@ import { FoodMenu } from './../../models/foodmenu';
 import { Restaurant } from './../../models/restaurant';
 import { DatePickerComponent } from './../../controls/datepicker.control';
 import { AutocompleteComponent } from './../../controls/autocomplete.control';
-import { IEntityDataService, IEmptyConstruct, IEntityContainer } from './../../models/interfaces';
+import { DropdownComponent } from './../../controls/dropdown.control';
+import { KendoDatePickerComponent } from './../../controls/kendo-datepicker.control'
+import { IEntityDataService, IEmptyConstruct, IEntityContainer, ChangesCommit, DataChanged } from './../../models/interfaces';
 
 @Component({
-    directives: [FORM_DIRECTIVES, AutocompleteComponent, DatePickerComponent],
+    directives: [FORM_DIRECTIVES, AutocompleteComponent, DatePickerComponent, DropdownComponent, KendoDatePickerComponent],
     templateUrl: `./../components/foodmenu/foodmenu-detail.html`
 })
 export class FoodMenuDetailComponent implements IEntityContainer {
@@ -32,8 +34,8 @@ export class FoodMenuDetailComponent implements IEntityContainer {
     {
         this._id = routeParams.get("id");
 
-        this.entityService.dataObserver.subscribe((updatedFoodMenus: any[]) => {
-            this.entity = updatedFoodMenus.find(menu => menu.ID === this._id && (menu instanceof FoodMenu)) as FoodMenu;
+        this.entityService.dataObserver.subscribe((updatedFoodMenus: DataChanged) => {
+            this.entity = updatedFoodMenus.data.find(menu => menu.ID === this._id && (menu instanceof FoodMenu)) as FoodMenu;
             if (!this.entity) this.entity = new FoodMenu();
         });
         this.entityService.fetchEntity(FoodMenu, this._id).then((_fm: FoodMenu) => {
@@ -51,8 +53,19 @@ export class FoodMenuDetailComponent implements IEntityContainer {
     }
 
     onSubmit() {
-        this.entityService.updateEntity(FoodMenu, this.entity);
-        this.location.back();
-        // this.router.navigate(['FoodMenuList']);
+        var myChangeID: string = "FoodMenu_Detail_Form_" + (Math.random() * 1000013);
+        var that = this;
+        this.entityService.dataObserver.subscribe((change: DataChanged) => {
+            if (change.ID === myChangeID) {
+                that.logger.log("Change execution result acknowledged: " + change.ID);
+                that.location.back();
+            }
+        });
+        this.logger.log("Change request emitted: " + myChangeID);
+        this.entityService.changesCommitObserver.next([{
+            ID: myChangeID,
+            data: [that.entity],
+            DataType: FoodMenu
+        }]);
     }
 }

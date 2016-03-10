@@ -17,6 +17,24 @@ textarea {
     max-width: 280px;
 }
 
+select {
+  background-color: lightcyan;
+  border-color: #b3cccc;
+  border-radius: .2em;
+  border-style: solid;
+  border-width: 1px;
+  border-right-color: #869999;
+  border-bottom-color: #869999;
+  color: black;
+  padding: .33em .5em;
+  width: 100%;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+
 /* Carousel */
 .carousel-caption {
     z-index: 10 !important;
