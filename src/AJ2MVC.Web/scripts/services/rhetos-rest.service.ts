@@ -4,11 +4,12 @@ import {Http, RequestOptions, Headers} from 'angular2/http';
 
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
 
-import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged, DataChangeType } from './../models/interfaces';
 import { MyClaim } from './../models/security/claim';
 import { PermissionProvider } from './../services/permission-provider.service';
 
@@ -33,7 +34,7 @@ export class DataStructureWithClaims {
 export class RhetosRestService implements IEntityDataService {
     public data: Array<IDataStructure>;
     public dataObserver: EventEmitter<DataChanged> = new EventEmitter<DataChanged>();
-    public changesCommitObserver: EventEmitter<Array<ChangesCommit>> = new EventEmitter<Array<ChangesCommit>>();
+    public changesStream: Observable<ChangesCommit>;
     protected _http: Http;
     protected _permissionHolderPromise: Promise<MyClaim[]>;
     protected _dummyEntityInstances: Array<DataStructureWithClaims> = new Array<DataStructureWithClaims>();
@@ -67,14 +68,37 @@ export class RhetosRestService implements IEntityDataService {
         this.data = new Array<IDataStructure>();
         this._http = http;
         this.permissionProvider.data$.subscribe(newPermissions => this.updatePermissions(newPermissions));
-        this.changesCommitObserver.subscribe((changes: Array<ChangesCommit>) => {
-            changes.map((changePerType: ChangesCommit) => {
-                // batch or one-by-one save implementation...
-                changePerType.data.map((item: IDataStructure) => {
-                    this.updateEntity(changePerType.DataType, item, changePerType.ID);
+    }
+
+    private streamHandler() {
+        this.changesStream.subscribe((change: ChangesCommit) => {
+            if (change) {
+                change.data.map((item: IDataStructure) => {
+                    switch (change.ChnageType) {
+                        case DataChangeType.Update:
+                            this.updateEntity(change.DataType, item, change.ID);
+                            break;
+                        case DataChangeType.Insert:
+                            this.createEntity(change.DataType, item);
+                            break;
+                        case DataChangeType.Delete:
+                            this.deleteEntity(change.DataType, item);
+                            break;
+                        default:
+                            console.log('Unhandled data change registered ' + change.ChnageType);
+                    }
                 });
-            });
+            }
         });
+    }
+
+    public registerNewChangesStream(newStream: Observable<ChangesCommit>) {
+        if (this.changesStream)
+            this.changesStream = Observable.prototype.merge(this.changesStream, newStream);
+        else {
+            this.changesStream = newStream;
+            this.streamHandler();
+        }
     }
 
     private updatePermissions(permissions: MyClaim[]) {

@@ -2,6 +2,7 @@
 import { Injectable, EventEmitter } from 'angular2/core';
 
 import 'rxjs/add/operator/share';
+import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
 
@@ -13,7 +14,7 @@ import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, Chang
 export class LocalStorageService implements IEntityDataService {
     data: Array<IDataStructure>;
     public dataObserver: EventEmitter<DataChanged> = new EventEmitter<DataChanged>();
-    public changesCommitObserver: EventEmitter<Array<ChangesCommit>> = new EventEmitter<Array<ChangesCommit>>();
+    public changesStream: Observable<ChangesCommit> = Observable.prototype.startWith(null);
     private _loaded: boolean = false;
     protected _dummyEntityInstances: Array<IDataStructure> = new Array<IDataStructure>();
     protected entCounter: number = 1;
@@ -31,6 +32,10 @@ export class LocalStorageService implements IEntityDataService {
             this._dummyEntityInstances.push(res);
         }
         return res;
+    }
+
+    public registerNewChangesStream(newStream: Observable<ChangesCommit>) {
+        this.changesStream = Observable.merge(this.changesStream, newStream);
     }
 
     public getModuleName(DataStructure: IEmptyConstruct): string { return this.getDummy(DataStructure).getModuleName(); }

@@ -1,5 +1,5 @@
 ﻿import { Injectable, EventEmitter } from 'angular2/core';
-import { Validator, ControlGroup } from 'angular2/common';
+import { Validator, ControlGroup, NgFormModel } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
 import { Storage, MenuItem, IMenuItem } from './../controls/menu';
 
@@ -53,9 +53,16 @@ export class FieldFilter {
     }
 }
 
+export enum DataChangeType {
+    Insert,
+    Update,
+    Delete
+}
+
 export class ChangesCommit {
     public ID: string = ""; // change identifier
     public DataType: IEmptyConstruct;
+    public ChnageType: DataChangeType;
     public data: Array<IDataStructure>;
 }
 
@@ -67,8 +74,8 @@ export class DataChanged {
 @Injectable()
 export abstract class IEntityDataService {
     data: Array<any>;
-    changesCommitObserver: EventEmitter<Array<ChangesCommit>>;
     dataObserver: EventEmitter<DataChanged>;
+    abstract registerNewChangesStream(newStream: Observable<ChangesCommit>): void;
     abstract getEntityNameID(DataStructure: IEmptyConstruct): string;
     abstract initdataLoad(DataStructure: IEmptyConstruct): void;
     abstract reloadData(DataStructure: IEmptyConstruct): void;

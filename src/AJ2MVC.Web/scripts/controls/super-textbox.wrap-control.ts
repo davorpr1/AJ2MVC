@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Inject, forwardRef, Input } from 'angular2/core';
-import { FORM_DIRECTIVES, ControlGroup, Validators, FormBuilder } from 'angular2/common';
+import { FORM_DIRECTIVES, ControlGroup, Validators, FormBuilder, NgFormModel } from 'angular2/common';
 import { BaseEntity } from './../models/entitybase';
 import { TestLogger } from './../services/logger';
 import { IEntityContainer, IOverrideDetailComponent, OverrideDetailComponent, ValidatorDefinition } from './../models/interfaces';

@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit, DynamicComponentLoader, ElementRef, ComponentRef, Injectable, Input, Injector, Provider, provide } from 'angular2/core';
-import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl } from 'angular2/common';
+import { FORM_DIRECTIVES, FormBuilder, Validators, ControlGroup, AbstractControl, NgFormModel } from 'angular2/common';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
 import { TestLogger } from './../../services/logger';
@@ -19,16 +19,13 @@ import { TextboxComponent } from './../../controls/textbox.control';
             <h3>Restaurant details</h3>
             <br />
             <p>{{entity.Name}}</p>
-            <form [ngFormModel]="entityForm" (ngSubmit)="onSubmit()">
-              <div #formStart></div>
-              <div #nameControl></div>
-              <div #addressControl></div>
-            <div #formEnd></div>
-            <div *ngIf="entityForm.dirty && !entityForm.pending && !entityForm.valid"  
-                    class="alert alert-danger">Restaurant data is not valid</div>
-
-              <button type="submit" class="btn btn-default" [disabled]="!entityForm.dirty || !entityForm.valid || entityForm.pending">Submit</button>
-            </form>
+<form [ngFormModel]="entityForm.form" (ngSubmit)="onSubmit()">
+    <div #formStart></div>
+    <div #nameControl></div>
+    <div #addressControl></div>
+    <div #formEnd></div>
+    <button type="submit" class="btn btn-default" [disabled]="!entityForm.valid">Submit</button>
+</form>
         `
 })
 @Injectable()
