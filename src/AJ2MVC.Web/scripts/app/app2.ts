@@ -20,10 +20,12 @@ import { FoodMenu } from './../models/foodmenu';
 import { Restaurant } from './../models/restaurant';
 import { IDataStructure, IEntityDataService, OverrideComponentDescriptor, IEntityContainer } from './../models/interfaces';
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
+import { DataOverridesFactory } from './../factories/data-overrides.factory';
 import { RestaurantDetailCustomWebsiteControlComponent } from './../overrides/restaurant-detail-addedControl.component';
 import { RestaurantDetailNameLabelOverrideComponent } from './../overrides/restaurant-detail-nameControl.component';
 import { FoodMenuListEntityListOverrideComponent } from './../overrides/foodmenu-list-entityList.component';
 import { MenuComponent } from './../controls/menu'
+import { OverrideSaveFoodMenuDetail } from './../overrides/foodmenu-definition.override';
 
 declare var jQuery: JQueryStatic;
 
@@ -52,6 +54,7 @@ class App2Component implements AfterViewInit {
         let x: any = RestaurantDetailNameLabelOverrideComponent; // just to trigger decorator code
         x = RestaurantDetailCustomWebsiteControlComponent; // just to trigger decorator code
         x = FoodMenuListEntityListOverrideComponent; // just to trigger decorator code
+        x = OverrideSaveFoodMenuDetail;
     }
 
     ngAfterViewInit() {
@@ -71,7 +74,7 @@ export class CORSBrowserXHr extends BrowserXhr {
 }
 
 bootstrap(App2Component, [
-    RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory, IEntityContainer,
+    RhetosRestService, PermissionProvider, LocalStorageService, ComponentOverridesFactory, IEntityContainer, DataOverridesFactory,
 
     provide(IEntityDataService, { useClass: RhetosRestService }),
 

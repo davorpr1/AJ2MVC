@@ -28,7 +28,11 @@ export class Restaurant extends BaseEntity {
 
     public ID: string;
 
-    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "", DataType: "string" }, { Name: "Address", Pipe: "", DataType: "string" }, { Name: "WebSite", Pipe: "", DataType: "string" }]; }
+    browseFields: Array<FieldDefinition> = [
+        { Name: "Name", Pipe: "", DataType: "string" },
+        { Name: "Address", Pipe: "", DataType: "string" },
+        { Name: "WebSite", Pipe: "", DataType: "string" }
+    ];
 
     getNewInstance(): Restaurant { return new Restaurant(); }
     getModuleName(): string { return "FoodOrder"; }

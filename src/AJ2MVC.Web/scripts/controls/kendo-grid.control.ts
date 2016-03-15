@@ -11,7 +11,7 @@ import { BaseEntity } from './../models/entitybase';
 })
 export class KendoGridComponent implements AfterViewInit, OnDestroy {
     @Input() set entityType(EntityType: IEmptyConstruct) {
-        this.showEntity = new EntityType();
+        this.showEntity = this.entityService.getDummy(EntityType);
         this.EntityDataStructure = EntityType;
         this.registerDataService();
     }
@@ -67,11 +67,21 @@ export class KendoGridComponent implements AfterViewInit, OnDestroy {
     registerDataService() {
         if (this.gridContainer && this.showEntity) {
             this.gridColumns = this.showEntity.browseFields.map(x => {
-                return {
-                    title: x.Name,
-                    field: x.Name,
-                    type: x.DataType,
-                    width: 150
+                if (x.DataType == 'date') {
+                    return {
+                        title: x.Name,
+                        field: x.Name,
+                        type: x.DataType,
+                        template: '#= kendo.toString(' + x.Name + ', "dd.MM.yyyy.") #',
+                        width: 150
+                    };
+                } else {
+                    return {
+                        title: x.Name,
+                        field: x.Name,
+                        type: x.DataType,
+                        width: 150
+                    };
                 }
             });
             var that = this;
@@ -87,8 +97,12 @@ export class KendoGridComponent implements AfterViewInit, OnDestroy {
                     pageSize: 5
                 },
                 pageable: true,
-                toolbar: [`<div class="toolbar"><button class="ui-icon-plus" click="function(){that.openDetail(that.showEntity.getNewInstance());}">New</button></div>`]
+                toolbar: [{
+                    template: kendo.template("<a class='k-button k-button-icontext k-grid-add' id='gridContainer_addbutton_" + this._controlID + "'>New</a>")
+                }]
             }).data("kendoGrid");
+            // ugly to the bone
+            jQuery('#gridContainer_addbutton_' + this._controlID).click((event: JQueryEventObject) => { that.openDetail(that.showEntity.getNewInstance()); });
             this.dataLoadSubscription = this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
                 if (!that._filters || that._filters.length === 0) {
                     that.showEntityList = that.entityService.getCurrentLibrary(that.EntityDataStructure);

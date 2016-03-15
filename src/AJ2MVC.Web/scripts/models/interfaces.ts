@@ -1,4 +1,4 @@
-﻿import { Injectable, EventEmitter } from 'angular2/core';
+﻿import { Injectable, EventEmitter, Injector } from 'angular2/core';
 import { Validator, ControlGroup, NgFormModel } from 'angular2/common';
 import { Observable } from 'rxjs/Observable';
 import { Storage, MenuItem, IMenuItem } from './../controls/menu';
@@ -86,6 +86,8 @@ export abstract class IEntityDataService {
     abstract createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
     abstract deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure): void;
     abstract filterData(DataStructure: IEmptyConstruct, filters: FieldFilter[]): Promise<any[]>;
+
+    abstract getDummy(DataStructure: IEmptyConstruct): IDataStructure;
 }
 
 export class OverrideComponentDescriptor {
@@ -140,5 +142,32 @@ export function AppMenuItem(params: IMenuItem) {
     return (target: any) => {
         DecoratorRegistrations.registeredDecorators.push(new MenuItem(params));
         console.log(' ***** Menu item registered in declaration time: ' + target + ', args: ' + params);
+    }
+}
+
+/*Override data definition*/
+
+export class OverrideDataDefinitionDescriptor {
+    hostDataDescriptor: string;
+    overrideDataDefinition: any;
+    constructor(item: OverrideDataDefinitionDescriptor) {
+        this.hostDataDescriptor = item.hostDataDescriptor;
+        this.overrideDataDefinition = item.overrideDataDefinition;
+    }
+}
+
+export interface OverrideDataDefinitionMetadata {
+    hostDataDefinition: any;
+}
+export class ClassHelper {
+    static getClassName(someClass: any): string {
+        return someClass["constructor"].toString().match(/\w+/g)[1];
+    }
+}
+
+export function OverrideDataDefinition(params: OverrideDataDefinitionMetadata) {
+    return (target: any) => {
+        DecoratorRegistrations.registeredDecorators.push(new OverrideDataDefinitionDescriptor({ hostDataDescriptor: params.hostDataDefinition.name, overrideDataDefinition: target }));
+        console.log(' ***** Override detail component registered: ' + target.name + ', args: ' + params.hostDataDefinition.name);
     }
 }

@@ -2,7 +2,7 @@
 <br />
 <p>{{entity.Name}}</p>
 <form [ngFormModel]="entityForm" (ngSubmit)="onSubmit()">
-    <div *ngIf="inProgressChangeID" style="width:100%;height:100%;background-color:transparent;z-index:10000;"></div>
+    <div #busyOverlayPlace></div>
     <div class="form-group">
         <label for="Name">Name</label>
         <input ngControl="Name" type="text" [(ngModel)]="entity.Name">

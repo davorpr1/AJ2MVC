@@ -1,5 +1,5 @@
 ﻿import {Observable} from 'rxjs/Observable';
-import { Injectable, EventEmitter } from 'angular2/core';
+import { Injectable, EventEmitter, Injector } from 'angular2/core';
 import {Http, RequestOptions, Headers} from 'angular2/http';
 
 import 'rxjs/add/operator/share';
@@ -8,17 +8,28 @@ import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/toPromise';
 
 import { AppSettings } from './../app/app.settings';
+import { DataOverridesFactory } from './../factories/data-overrides.factory';
 
-import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged, DataChangeType } from './../models/interfaces';
+import { IDataStructure, IEntityDataService, IEmptyConstruct, FieldFilter, ChangesCommit, DataChanged, DataChangeType, ClassHelper } from './../models/interfaces';
 import { MyClaim } from './../models/security/claim';
 import { PermissionProvider } from './../services/permission-provider.service';
 
 export class DataStructureWithClaims {
     dataStructure: IDataStructure;
     DataStructureType: IEmptyConstruct;
-    constructor(DataStructure: IEmptyConstruct) {
+    constructor(
+        private injector: Injector,
+        DataStructure: IEmptyConstruct
+    ) {
         this.DataStructureType = DataStructure;
         this.dataStructure = new DataStructure();
+        var factory: DataOverridesFactory = this.injector.get(DataOverridesFactory);
+        var overrides = factory.getAllDataOverrides([(DataStructure as any).name]);
+        overrides.map(x => x.overrideDataDefinition.prototype.override(this));
+    }
+
+    public save(ent: any, baseSave: (ent2: any) => void): void {
+        baseSave(ent);
     }
 
     ReadRight: boolean = false;
@@ -47,7 +58,7 @@ export class RhetosRestService implements IEntityDataService {
         let res: DataStructureWithClaims;
         res = this._dummyEntityInstances.find((dummy: DataStructureWithClaims) => dummy.dataStructure instanceof DataStructure);
         if (!res) {
-            res = new DataStructureWithClaims(DataStructure);
+            res = new DataStructureWithClaims(this.injector, DataStructure);
             this._dummyEntityInstances.push(res);
             this.updatePermissions(this.permissionProvider.checkEntityPermissions(res.dataStructure));
         }
@@ -64,13 +75,15 @@ export class RhetosRestService implements IEntityDataService {
         return res;
     }
 
-    constructor(http: Http, private permissionProvider: PermissionProvider) {
+    constructor(http: Http,
+        private injector: Injector,
+        private permissionProvider: PermissionProvider
+    ) {
         this.data = new Array<IDataStructure>();
         this._http = http;
         this.permissionProvider.data$.subscribe(newPermissions => this.updatePermissions(newPermissions));
-    }
+        this.changesStream = new EventEmitter<ChangesCommit>();
 
-    private streamHandler() {
         this.changesStream.subscribe((change: ChangesCommit) => {
             if (change) {
                 change.data.map((item: IDataStructure) => {
@@ -79,7 +92,7 @@ export class RhetosRestService implements IEntityDataService {
                             this.updateEntity(change.DataType, item, change.ID);
                             break;
                         case DataChangeType.Insert:
-                            this.createEntity(change.DataType, item);
+                            this.createEntity(change.DataType, item, change.ID);
                             break;
                         case DataChangeType.Delete:
                             this.deleteEntity(change.DataType, item);
@@ -91,14 +104,12 @@ export class RhetosRestService implements IEntityDataService {
             }
         });
     }
-
+    
     public registerNewChangesStream(newStream: Observable<ChangesCommit>) {
-        if (this.changesStream)
-            this.changesStream = Observable.prototype.merge(this.changesStream, newStream);
-        else {
-            this.changesStream = newStream;
-            this.streamHandler();
-        }
+        var that = this;
+        newStream.subscribe((change: ChangesCommit) => {
+            (that.changesStream as EventEmitter<ChangesCommit>).next(change);
+        });
     }
 
     private updatePermissions(permissions: MyClaim[]) {
@@ -217,7 +228,7 @@ export class RhetosRestService implements IEntityDataService {
         }
     }
 
-    createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {
+    createEntity(DataStructure: IEmptyConstruct, entity: IDataStructure, emitID?: string) {
         var perm: DataStructureWithClaims = this.getDummyWithClaim(DataStructure);
         if (!perm.NewRight) {
             if (perm.PermissionLoaded) {
@@ -226,12 +237,13 @@ export class RhetosRestService implements IEntityDataService {
         } else {
             let headers = new Headers({ 'Content-Type': 'application/json' });
             let options = new RequestOptions({ headers: headers });
+            var that = this;
 
             this._http.post(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/', this.entityToJSON(entity), options)
                 .subscribe(data => {
                     entity.ID = data.json().ID;
                     this.data.push(entity);
-                    this.dataObserver.next({ ID: "", data: this.data });
+                    that.dataObserver.next({ ID: (emitID) ? emitID : "", data: that.data });
                 }, (error: any) => console.log('Could not create entity.'));
         }
     }
@@ -241,18 +253,22 @@ export class RhetosRestService implements IEntityDataService {
             this.createEntity(DataStructure, entity);
             return;
         }
+        var perm: DataStructureWithClaims = this.getDummyWithClaim(DataStructure);
+        var that = this;
+        var baseURL = AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID;
+        perm.save(entity, (finalEnt: IDataStructure) => {
+            let headers = new Headers({ 'Content-Type': 'application/json' });
+            let options = new RequestOptions({ headers: headers });
 
-        let headers = new Headers({ 'Content-Type': 'application/json' });
-        let options = new RequestOptions({ headers: headers });
+            that._http.put(baseURL, that.entityToJSON(finalEnt), options)
+                .subscribe(data => {
+                    that.data.forEach((rest, i) => {
+                        if (finalEnt.ID === rest.ID) { that.data[i] = finalEnt; }
+                    });
 
-        this._http.put(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID, this.entityToJSON(entity), options)
-            .subscribe(data => {
-                this.data.forEach((rest, i) => {
-                    if (entity.ID === rest.ID) { this.data[i] = entity; }
-                });
-
-                this.dataObserver.next({ ID: (emitID) ? emitID: "", data: this.data });
-            }, (error: any) => console.log('Could not update entity.'));
+                    that.dataObserver.next({ ID: (emitID) ? emitID : "", data: that.data });
+                }, (error: any) => console.log('Could not update entity.'));
+        });
     }
 
     deleteEntity(DataStructure: IEmptyConstruct, entity: IDataStructure) {

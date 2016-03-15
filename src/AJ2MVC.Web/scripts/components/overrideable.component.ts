@@ -3,12 +3,12 @@ import { TestLogger } from './../services/logger';
 import { IOverrideDetailComponent } from './../models/interfaces';
 
 import { ComponentOverridesFactory } from './../factories/component-overrides.factory';
-
+import { BusyIndicatedComponent } from './../components/busy-indicated.component';
 @Component({
     template: `<div #DEFAULTANCHOR></div>`
 })
 @Injectable()
-export class OverrideableDetailComponent implements OnInit {
+export class OverrideableDetailComponent extends BusyIndicatedComponent implements OnInit {
 
     public controls: Array<any> = new Array<{ placeHolder: string, component: any, propertyName: string, componentInstance: any }>();
     public initializationComplete: EventEmitter<number> = new EventEmitter<number>();
@@ -18,6 +18,7 @@ export class OverrideableDetailComponent implements OnInit {
         private injector_ODC: Injector,
         public elementRef_ODC: ElementRef
     ) {
+        super(logger_ODC, dynamicComponentLoader_ODC, elementRef_ODC);
         logger_ODC.log("Overrideable support initiated!");
     }
 
@@ -27,6 +28,7 @@ export class OverrideableDetailComponent implements OnInit {
     }
 
     ngOnInit() {
+        super.ngOnInit();
         var that = this;
         var factory: ComponentOverridesFactory = this.injector_ODC.get(ComponentOverridesFactory);
 

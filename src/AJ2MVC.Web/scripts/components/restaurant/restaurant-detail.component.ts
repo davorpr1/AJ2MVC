@@ -4,7 +4,7 @@ import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod,
 import { RouteConfig, ROUTER_DIRECTIVES, RouteParams, Router } from 'angular2/router';
 import { TestLogger } from './../../services/logger';
 import { Restaurant } from './../../models/restaurant';
-import { IEntityDataService, IEntityContainer, IOverrideDetailComponent, ControlDefinition } from './../../models/interfaces';
+import { IEntityDataService, IEntityContainer, IOverrideDetailComponent, ControlDefinition, DataChanged } from './../../models/interfaces';
 import { OverrideableDetailComponent } from './../../components/overrideable.component';
 import { GridComponent } from './../../controls/grid.control';
 import { ComponentOverridesFactory } from './../../factories/component-overrides.factory';
@@ -19,7 +19,7 @@ import { TextboxComponent } from './../../controls/textbox.control';
             <h3>Restaurant details</h3>
             <br />
             <p>{{entity.Name}}</p>
-<form [ngFormModel]="entityForm.form" (ngSubmit)="onSubmit()">
+<form [ngFormModel]="entityForm" (ngSubmit)="onSubmit()">
     <div #formStart></div>
     <div #nameControl></div>
     <div #addressControl></div>
@@ -51,8 +51,8 @@ export class RestaurantDetailComponent extends OverrideableDetailComponent imple
     {
         super(logger, dynamicComponentLoader, injector, elementRef);
         this.entityID = routeParams.get("id");
-        this.entityService.dataObserver.subscribe((updatedRestaurants: any[]) => {
-            this.entity.setModelData(updatedRestaurants.find(rest => rest.ID === this.entityID && rest instanceof Restaurant) as Restaurant);
+        this.entityService.dataObserver.subscribe((updatedRestaurants: DataChanged) => {
+            this.entity.setModelData(updatedRestaurants.data.find(rest => rest.ID === this.entityID && rest instanceof Restaurant) as Restaurant);
             if (!this.entity) this.entity = new Restaurant();
         });
         this.entityService.fetchEntity(Restaurant, this.entityID).then((_rest: any) => {

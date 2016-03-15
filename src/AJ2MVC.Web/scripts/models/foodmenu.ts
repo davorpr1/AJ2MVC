@@ -29,7 +29,12 @@ export class FoodMenu extends BaseEntity {
             this.ActiveUntil = formatMSDate(this._activeUntilDate);
     }
 
-    get browseFields(): Array<FieldDefinition> { return [{ Name: "Name", Pipe: "", DataType: "string" }, { Name: "ActiveFromDate", Pipe: "msDate", DataType: "date" }, { Name: "ActiveUntilDate", Pipe: "msDate", DataType: "date" }]; }
+    public browseFields: Array<FieldDefinition> =
+        [
+            { Name: "Name", Pipe: "", DataType: "string" },
+            { Name: "ActiveFrom", Pipe: "", DataType: "string" },
+            { Name: "ActiveUntil", Pipe: "", DataType: "string" }
+        ];
 
     getNewInstance(): FoodMenu { return new FoodMenu(); }
     getModuleName(): string { return "FoodOrder"; }

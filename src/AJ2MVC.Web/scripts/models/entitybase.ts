@@ -11,7 +11,7 @@ export class BaseEntity implements IDataStructure {
         return {
         };
     }
-    get browseFields(): Array<FieldDefinition> { return [{ Name: "ID", Pipe: "", DataType: "string" }]; }
+    browseFields: Array<FieldDefinition> = [{ Name: "ID", Pipe: "", DataType: "string" }];
     getNewInstance(): IDataStructure { throw "Has to be overriden."; }
     getModuleName(): string { return ""; }
     getEntityName(): string { return ""; }
