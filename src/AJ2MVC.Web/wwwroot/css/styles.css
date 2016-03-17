@@ -326,3 +326,24 @@ form {
   top:35%;
   left:35%;
 }
+
+.tooltip {
+  color: #900;
+  text-decoration: none;
+}
+.tooltip:hover {
+  color: red;
+  position: relative;
+}
+/* Tooltip on Top */
+.tooltip-top[data-tooltip]:hover:after {
+  content: attr(data-tooltip);
+  padding: 4px 8px;
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  white-space: nowrap;
+  z-index: 20px;
+  background-color: #000;
+  color: #fff;
+}

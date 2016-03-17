@@ -2,9 +2,9 @@
 import { Router } from 'angular2/router';
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { bootstrap } from 'angular2/platform/browser';
-import { TOOLTIP_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 import { TestLogger } from './../services/logger';
 import { IDataStructure, IEntityDataService, DecoratorRegistrations } from './../models/interfaces';
+import { OMAttributes } from './../directives/om_attribute';
 
 export class Storage<T> {
     public data: Array<T> = new Array<T>();
@@ -64,14 +64,13 @@ export class MenuItem {
 }
 
 @Component({
-    directives: [FORM_DIRECTIVES, TOOLTIP_DIRECTIVES],
+    directives: [FORM_DIRECTIVES, OMAttributes],
     selector: 'app-menu',
     template: `Menu
-        <nav><a *ngFor="#menuItem of _plainMenu" 
-           tooltip="{{menuItem.Tooltip}}"
-           tooltipPlacement="top"
-           tooltipTrigger="mouseenter"
-           (click)="gotoMenuDirection(menuItem)">{{menuItem.Name}}</a>
+        <nav><span *ngFor="#menuItem of _plainMenu" 
+           class="tooltip tooltip-top"
+           [omAttributes]="{'data-tooltip': menuItem.Tooltip }"
+           (click)="gotoMenuDirection(menuItem)">{{menuItem.Name}}</span>
         </nav>`
 })
 export class MenuComponent  {

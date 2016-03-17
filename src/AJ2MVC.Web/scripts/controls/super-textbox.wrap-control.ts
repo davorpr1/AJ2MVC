@@ -14,7 +14,8 @@ import { SuperTextboxComponent } from './../controls/super-textbox.control';
                 <div *ngFor="#validator of validators">
                     <div *ngIf="customizedForm.controls['TextField'].hasError(validator.ErrorCode) && !customizedForm.controls['TextField'].pristine" class="ui error message">{{validator.ErrorMessage}}</div>
                 </div>
-              </div></div>`
+              </div></div>`,
+
 })
 export class SuperTextboxWrapComponent {
     public parent: IEntityContainer = { entity: new BaseEntity(), entityForm: null };

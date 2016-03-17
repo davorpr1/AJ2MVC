@@ -49,6 +49,8 @@ export class FoodMenuDetailComponent extends OverrideableDetailComponent impleme
             else {
                 this.logger.log("Change execution result acknowledged: " + updatedFoodMenus.ID);
             }
+            this.changeDetector.markForCheck();
+
             if (this.inProgressChangeID && this.inProgressChangeID == updatedFoodMenus.ID) {
                 this.inProgressChangeID = null;
                 this.busy = false;

@@ -28,7 +28,10 @@ export class DataStructureWithClaims {
         overrides.map(x => x.overrideDataDefinition.prototype.override(this));
     }
 
-    public save(ent: any, baseSave: (ent2: any) => void): void {
+    public saveNew(ent: any, baseSave: (ent2: any) => void): void {
+        baseSave(ent);
+    }
+    public saveOld(ent: any, baseSave: (ent2: any) => void): void {
         baseSave(ent);
     }
 
@@ -235,16 +238,19 @@ export class RhetosRestService implements IEntityDataService {
                 console.log('User does not have "New" right on "' + this.getModuleName(DataStructure) + '.' + this.getEntityName(DataStructure) + '".');
             }
         } else {
-            let headers = new Headers({ 'Content-Type': 'application/json' });
-            let options = new RequestOptions({ headers: headers });
             var that = this;
-
-            this._http.post(AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/', this.entityToJSON(entity), options)
-                .subscribe(data => {
-                    entity.ID = data.json().ID;
-                    this.data.push(entity);
-                    that.dataObserver.next({ ID: (emitID) ? emitID : "", data: that.data });
-                }, (error: any) => console.log('Could not create entity.'));
+            var baseURL = AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/';
+        
+            perm.saveNew(entity, (finalEnt: IDataStructure) => {
+                let headers = new Headers({ 'Content-Type': 'application/json' });
+                let options = new RequestOptions({ headers: headers });
+                this._http.post(baseURL, this.entityToJSON(entity), options)
+                    .subscribe(data => {
+                        entity.ID = data.json().ID;
+                        this.data.push(entity);
+                        that.dataObserver.next({ ID: (emitID) ? emitID : "", data: that.data });
+                    }, (error: any) => console.log('Could not create entity.'));
+            });
         }
     }
 
@@ -256,7 +262,7 @@ export class RhetosRestService implements IEntityDataService {
         var perm: DataStructureWithClaims = this.getDummyWithClaim(DataStructure);
         var that = this;
         var baseURL = AppSettings.API_ENDPOINT + this.getModuleName(DataStructure) + '/' + this.getEntityName(DataStructure) + '/' + entity.ID;
-        perm.save(entity, (finalEnt: IDataStructure) => {
+        perm.saveOld(entity, (finalEnt: IDataStructure) => {
             let headers = new Headers({ 'Content-Type': 'application/json' });
             let options = new RequestOptions({ headers: headers });
 

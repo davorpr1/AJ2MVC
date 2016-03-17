@@ -1,7 +1,8 @@
 ﻿/// <reference path="../../typings/jquery/jquery.d.ts" />
 /// <reference path="../../typings/jqueryui/jqueryui.d.ts" />
+/// <reference path="../../typings/es6-shim.d.ts" />
 
-import {Component, provide, Injectable, ElementRef, AfterViewInit} from 'angular2/core';
+import {Component, provide, Injectable, ElementRef, AfterViewInit, ChangeDetectionStrategy} from 'angular2/core';
 import {FORM_PROVIDERS, NgModel} from 'angular2/common';
 import { RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS, Router, HashLocationStrategy, LocationStrategy } from 'angular2/router';
 import { Http, HTTP_PROVIDERS, Response, Request, RequestOptions, RequestMethod, Headers, BrowserXhr } from 'angular2/http';

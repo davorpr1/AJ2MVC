@@ -1,4 +1,4 @@
-﻿import { Input, Output, HostBinding, AfterViewInit, HostListener, EventEmitter, Component, Self, Attribute, ViewEncapsulation, ElementRef } from 'angular2/core';
+﻿import { Input, Output, HostBinding, AfterViewInit, HostListener, EventEmitter, Component, Self, Attribute, ViewEncapsulation, ElementRef, ChangeDetectorRef } from 'angular2/core';
 import { ControlValueAccessor, NgControl } from 'angular2/common';
 import { Router } from 'angular2/router';
 import { IEntityDataService, IEmptyConstruct, IDataStructure, FieldFilter } from './../models/interfaces';
@@ -39,7 +39,8 @@ export class GridComponent implements AfterViewInit {
 
     constructor(private elRef: ElementRef,
         private router: Router,
-        private entityService: IEntityDataService
+        private entityService: IEntityDataService,
+        private cd: ChangeDetectorRef
     ) {
         this._controlID = ++GridComponent.staticID;
     }
@@ -98,6 +99,7 @@ export class GridComponent implements AfterViewInit {
                 }
             });
             this.gridContainer.pqGrid("option", "scrollModel.autoFit", true);
+            this.cd.detectChanges();
             this.entityService.dataObserver.subscribe((updatedEntities: Array<any>) => {
                 if (!this._filters || this._filters.length === 0) {
                     this.showEntityList = this.entityService.getCurrentLibrary(this.EntityDataStructure);
